@@ -1,0 +1,9 @@
+{
+    "nombre": "Proyecto de sistema contable",
+    "id": 3,
+    "descripcion": "Aplicar conocimientos de C# y SQL Server en un sistema contable",
+    "startdate": "2022-07-21",
+    "endingdate": null,
+    "actividades": [],
+    "relaciones": []
+}

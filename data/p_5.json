@@ -1,0 +1,9 @@
+{
+    "nombre": "Construccion de gimnasio",
+    "id": 5,
+    "descripcion": "Construir un gimnasio para ganar plata",
+    "startdate": "2022-08-09",
+    "endingdate": null,
+    "actividades": [],
+    "relaciones": []
+}

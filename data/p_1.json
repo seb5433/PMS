@@ -1,0 +1,31 @@
+{
+    "nombre": "Aprender Calculo II",
+    "id": 1,
+    "descripcion": "Investigar y aplicar lo aprendido",
+    "startdate": "2022-05-20",
+    "endingdate": null,
+    "actividades": [
+        {
+            "nombre": "Inecuaciones",
+            "id": 0,
+            "duracion": "5",
+            "fechaini": "2022-05-20",
+            "fechafi": "2022-05-20"
+        },
+        {
+            "nombre": "Funciones",
+            "id": 1,
+            "duracion": "5",
+            "fechaini": "2022-05-25",
+            "fechafi": "2022-05-25"
+        },
+        {
+            "nombre": "Derivadas",
+            "id": 2,
+            "duracion": "5",
+            "fechaini": "2022-05-30",
+            "fechafi": "2022-05-30"
+        }
+    ],
+    "relaciones": []
+}

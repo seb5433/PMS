@@ -1,0 +1,9 @@
+{
+    "nombre": "Tercer Semestre",
+    "id": 6,
+    "descripcion": "Organizar las materias y plande estudios para el tercer semestre",
+    "startdate": "2022-07-15",
+    "endingdate": null,
+    "actividades": [],
+    "relaciones": []
+}

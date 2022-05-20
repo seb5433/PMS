@@ -1,0 +1,42 @@
+{
+    "nombre": "Creacion de videojuego",
+    "id": 1,
+    "descripcion": "Crearemos un videojuego con las herramientas de UNITY",
+    "startdate": "2022-05-20",
+    "endingdate": null,
+    "actividades": [
+        {
+            "nombre": "Aprender lenguajes de programacion",
+            "id": 0,
+            "duracion": "30",
+            "fechaini": "2022-05-20",
+            "fechafi": "2022-05-20"
+        },
+        {
+            "nombre": "Curso de UNITY",
+            "id": 1,
+            "duracion": "60",
+            "fechaini": "2022-06-20",
+            "fechafi": "2022-06-20"
+        },
+        {
+            "nombre": "Programar el videojuego",
+            "id": 2,
+            "duracion": "30",
+            "fechaini": "2022-08-20",
+            "fechafi": "2022-08-20"
+        }
+    ],
+    "relaciones": [
+        {
+            "id": 0,
+            "pre": 0,
+            "sig": 1
+        },
+        {
+            "id": 1,
+            "pre": 1,
+            "sig": 2
+        }
+    ]
+}

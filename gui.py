@@ -79,11 +79,11 @@ class App():
         """self.switch_1 = ctk.CTkSwitch(master=self.frame_left)
         self.switch_1.grid(row=9, column=0, pady=10, padx=20, sticky="w")"""
 
-        self.switch_2 = ctk.CTkSwitch(master=self.frame_left,
+        """self.switch_2 = ctk.CTkSwitch(master=self.frame_left,
                                                 text="Modo oscuro",
                                                 command=self.change_mode,
                                                 text_color = "white",)
-        self.switch_2.grid(row=10, column=0, pady=10, padx=20, sticky="w")
+        self.switch_2.grid(row=10, column=0, pady=10, padx=20, sticky="w")"""
 
 
         self.frame_right.rowconfigure((0), weight=1)
@@ -120,9 +120,12 @@ class App():
 class Portada (Parametros):
     """## Clase que genera una portada"""
 
-    def __init__(self, master) -> None:
+    def __init__(self, master, lista_proyectos = None) -> None:
         super().__init__()
         self.MASTER = master
+        self.LISTA_PROYECTOS = lista_proyectos
+        
+        self.data_manage ()
 
         self.MASTER.rowconfigure(0, weight=1)
         self.MASTER.columnconfigure(0, weight=1)
@@ -145,9 +148,16 @@ class Portada (Parametros):
         self.MASTER.mainloop()
         pass
 
+    def data_manage (self):
+        self.data = []
+        for proyecto in self.LISTA_PROYECTOS:
+            self.data.append ([proyecto.name, proyecto.description, proyecto.startdate, "0%"])
+            #print (proyecto.name)
+        
+
     def desplegar_tabla (self):
         
-        self.tabla_proyectos = sheet.Sheet(self.frame_down,headers= ['Proyecto', 'Descripción', 'Inicio', 'Avance'], data= [[f"Proyecto {i}",f"Este proyecto consiste en tal cosa tal cosa tal cosa",f"202{i}-15-15",f"{i}%",] for i in range (50)],
+        self.tabla_proyectos = sheet.Sheet(self.frame_down,headers= ['Proyecto', 'Descripción', 'Inicio', 'Avance'],data= self.data,
         show_table = True,
         show_top_left = False,
         show_row_index = True,
@@ -255,7 +265,7 @@ class Portada (Parametros):
         self.tabla_proyectos.header_align(align = "center", redraw = True)
         self.tabla_proyectos.align_columns(columns = [2,3], align = "center", align_header = True, redraw = True)
         self.tabla_proyectos.column_width(column = 0, width = 150, only_set_if_too_small = False, redraw = True)
-        self.tabla_proyectos.column_width(column = 1, width = 600, only_set_if_too_small = False, redraw = True)
+        self.tabla_proyectos.column_width(column = 1, width = 630, only_set_if_too_small = False, redraw = True)
         self.tabla_proyectos.column_width(column = 2, width = 130, only_set_if_too_small = False, redraw = True)
         self.tabla_proyectos.column_width(column = 3, width = 120, only_set_if_too_small = False, redraw = True)
         #self.tabla_proyectos.set_all_cell_sizes_to_text(redraw = True)
@@ -304,7 +314,7 @@ class Portada (Parametros):
 class Main (Parametros):
     """## Clase que genera el frame principal"""
 
-    def __init__(self) -> None:
+    def __init__(self, lista_proyectos = None) -> None:
         super().__init__()
         """### Creación y configuracion de la pagina principal"""
 
@@ -317,7 +327,7 @@ class Main (Parametros):
         self.RAIZ.title("Administrador de proyectos")
         self.RAIZ.config(bg=self.COLOR_FONDO)
         self.center (self.RAIZ)
-        Portada(self.RAIZ)
+        Portada(self.RAIZ, lista_proyectos)
 
 
 

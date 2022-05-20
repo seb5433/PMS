@@ -2,7 +2,7 @@
 
 from tkinter import *
 import tksheet as sheet
-import customtkinter
+import customtkinter as ctk
 import os
 import sys
 
@@ -16,6 +16,7 @@ class Parametros ():
         self.COLOR_LINEAS = "#316DCA"
         self.PATH = self.resource_path()
         self.PATH_IMAGE = os.path.join (self.PATH,'images')
+        self.PATH_CONFIG = os.path.join (self.PATH,'config')
 
     def resource_path(self):
         try:
@@ -182,7 +183,7 @@ class Portada (Parametros):
         # CREACION DEL ENTRY
         self.text_search = StringVar()
 
-        self.entry_buscador = Entry(self.frame_buscador_child, textvariable=self.text_search, width=42, font=("Arial", 16))
+        self.entry_buscador = ctk.CTkEntry(self.frame_buscador_child, textvariable=self.text_search,width=450, height=30, border_width=2, corner_radius=5)
         self.entry_buscador.grid(row=1,column=0, padx=3, sticky=N)
 
 
@@ -221,9 +222,9 @@ class Main (Parametros):
         """### Creación y configuracion de la pagina principal"""
 
 
-        customtkinter.set_default_color_theme("blue")
+        ctk.set_default_color_theme(os.path.join (self.PATH_CONFIG, "custom_theme.json"))
         #self.RAIZ = Tk("Adminstrador de proyectos", "Administrador de proyectos")
-        self.RAIZ = customtkinter.CTk()
+        self.RAIZ = ctk.CTk()
         self.RAIZ.geometry(f'{self.ANCHO}x{self.ALTO}')
         self.RAIZ.resizable(False, False)
         self.RAIZ.title("Administrador de proyectos")

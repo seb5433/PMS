@@ -1,10 +1,12 @@
 # GUI del administrador de proyectos
 
 from tkinter import *
+from tkcalendar import *
 import tksheet as sheet
 import customtkinter as ctk
 import os
 import sys
+import datetime
 
 class Parametros ():
     def __init__(self) -> None: 
@@ -28,6 +30,93 @@ class Parametros ():
         return os.path.join(base_path)
 
 
+class App():
+
+    def __init__(self, master, parent):
+        self.PARTENT = parent
+        self.MASTER = master
+        self.MASTER.grid_columnconfigure(1, weight=1)
+        self.MASTER.grid_rowconfigure(0, weight=1)
+
+        self.frame_left = ctk.CTkFrame(master=self.MASTER,
+                                                 width=180,
+                                                 corner_radius=0)
+        self.frame_left.grid(row=0, column=0, sticky="nswe")
+
+        self.frame_right = ctk.CTkFrame(master=self.MASTER)
+        self.frame_right.grid(row=0, column=1, sticky="nswe", padx=20, pady=20)
+
+        # ============ frame_left ============
+
+        # configure grid layout (1x11)
+        self.frame_left.grid_rowconfigure(0, minsize=10)   # empty row with minsize as spacing
+        self.frame_left.grid_rowconfigure(5, weight=1)  # empty row as spacing
+        self.frame_left.grid_rowconfigure(8, minsize=20)    # empty row with minsize as spacing
+        self.frame_left.grid_rowconfigure(11, minsize=10)  # empty row with minsize as spacing
+
+        self.label_1 = ctk.CTkLabel(master=self.frame_left,
+                                              text="Navegación",
+                                              text_font=("Roboto Medium", -20),
+                                              text_color = "white",
+                                              )  # font name and size in px
+        self.label_1.grid(row=1, column=0, pady=10, padx=10)
+
+        self.button_1 = ctk.CTkButton(master=self.frame_left,
+                                                text="Actividades",
+                                                command=self.button_event)
+        self.button_1.grid(row=2, column=0, pady=10, padx=20)
+
+        self.button_2 = ctk.CTkButton(master=self.frame_left,
+                                                text="Reporte",
+                                                command=self.button_event)
+        self.button_2.grid(row=3, column=0, pady=10, padx=20)
+
+        self.button_3 = ctk.CTkButton(master=self.frame_left,
+                                                text="Ir a inicio",
+                                                command=self.ir_a_inicio)
+        self.button_3.grid(row=4, column=0, pady=10, padx=20)
+
+        """self.switch_1 = ctk.CTkSwitch(master=self.frame_left)
+        self.switch_1.grid(row=9, column=0, pady=10, padx=20, sticky="w")"""
+
+        self.switch_2 = ctk.CTkSwitch(master=self.frame_left,
+                                                text="Modo oscuro",
+                                                command=self.change_mode,
+                                                text_color = "white",)
+        self.switch_2.grid(row=10, column=0, pady=10, padx=20, sticky="w")
+
+
+        self.frame_right.rowconfigure((0), weight=1)
+
+        today = datetime.date.today()
+        mindate = datetime.date(year=2018, month=1, day=21)
+        maxdate = today + datetime.timedelta(days=960)
+        print(mindate, maxdate)
+
+        cal = Calendar(self.frame_right, font="Cascade 13", selectmode='day', locale='es_ES',
+                    mindate=mindate, maxdate=maxdate, disabledforeground='red',
+                    cursor="hand2", year=2022, month=5, day=20)
+        cal.pack(fill="both", expand=True)
+
+    def button_event(self):
+        pass
+
+    def ir_a_inicio (self):
+        self.PARTENT.frame_portada.tkraise()
+
+    def change_mode(self):
+        if self.switch_2.get() == 1:
+            ctk.set_appearance_mode("dark")
+        else:
+            ctk.set_appearance_mode("light")
+
+    def on_closing(self, event=0):
+        self.destroy()
+
+    def start(self):
+        self.mainloop()
+
+
 class Portada (Parametros):
     """## Clase que genera una portada"""
 
@@ -35,12 +124,23 @@ class Portada (Parametros):
         super().__init__()
         self.MASTER = master
 
-        self.frame_up = Frame (self.MASTER, bg = self.COLOR_PRIMARIO)
-        self.frame_down = Frame (self.MASTER, bg = self.COLOR_PRIMARIO)
+        self.MASTER.rowconfigure(0, weight=1)
+        self.MASTER.columnconfigure(0, weight=1)
+
+        self.frame_calendario = Frame (self.MASTER, bg = self.COLOR_FONDO)
+        self.frame_calendario.grid(row = 0, column = 0, sticky= "nsew")
+        
+        self.frame_portada = Frame (self.MASTER, bg = self.COLOR_FONDO)
+        self.frame_portada.grid( row = 0, column = 0, sticky= "nsew",)
+        
+
+        self.frame_up = Frame (self.frame_portada, bg = self.COLOR_PRIMARIO)
+        self.frame_down = Frame (self.frame_portada, bg = self.COLOR_PRIMARIO)
         self.frame_up.pack (side = TOP, padx = 10, pady = 10, fill = "both")
         self.frame_down.pack (side = TOP, padx = 10, fill = "both",expand=True)
         self.desplegar_tabla()
         self.buscador()
+        #self.abrir()
 
         self.MASTER.mainloop()
         pass
@@ -165,54 +265,41 @@ class Portada (Parametros):
     def buscador(self):
         
         #Funcion que despliega el buscador y los botones 
+        
         # CREACION DE LA IMAGEN BUSCAR
-        self.lbl_buscar_image = PhotoImage(file=os.path.join( self.PATH_IMAGE,"buscar2.png"))
-
-        # CREACION DE FRAMES
-
-        self.frame_buscador_child = Frame(self.frame_up, bg=self.COLOR_PRIMARIO)
+        self.frame_buscador_child = ctk.CTkFrame(master=self.frame_up,fg_color=self.COLOR_PRIMARIO,width=10,height=50)
         self.frame_buscador_child.grid(row=0, column=0)
 
-        self.frame_espacio_vacio = Frame (self.frame_up,bg=self.COLOR_PRIMARIO)
-        self.frame_espacio_vacio.grid(row=0,column=1,padx=20)
+        self.frame_espacio_vacio = ctk.CTkFrame(master=self.frame_up,width=80,height=40,fg_color=self.COLOR_PRIMARIO)
+        self.frame_espacio_vacio.grid(row=0,column=1)
 
-        self.frame_botones = Frame (self.frame_up,bg=self.COLOR_PRIMARIO)
-        self.frame_botones.grid(row=0,column=2,columnspan=3,rowspan=2)
+        self.frame_botones = ctk.CTkFrame(master=self.frame_up,width=500,height=40,fg_color=self.COLOR_PRIMARIO)
+        self.frame_botones.grid(row=0,column=2,columnspan=3)
 
 
         # CREACION DEL ENTRY
-        self.text_search = StringVar()
 
-        self.entry_buscador = ctk.CTkEntry(self.frame_buscador_child, textvariable=self.text_search,width=450, height=30, border_width=2, corner_radius=5)
-        self.entry_buscador.grid(row=1,column=0, padx=3, sticky=N)
+        self.entry_buscador = ctk.CTkEntry(master=self.frame_buscador_child,text_font=("Cascade", 16),placeholder_text="Buscar proyecto...",width=500,height=40,fg_color=self.COLOR_FONDO)
+        self.entry_buscador.pack(padx=20)
 
-
-        # CREACION DEL LABEL BUSCAR PROYECTO IMAGEN
-        self.lbl_buscar = Label(self.frame_buscador_child, bg=self.COLOR_PRIMARIO, image=self.lbl_buscar_image, relief="flat")
-        self.lbl_buscar.grid(row=0, column=0, sticky=W)
-
-        # CREACION DE LABELS VACIO 
-        self.espacio_vacio_1= Label (self.frame_botones,relief="flat", bg=self.COLOR_PRIMARIO) 
-        self.espacio_vacio_1.grid(row=0,column=0)
-
-        self.espacio_vacio_2 = Label (self.frame_espacio_vacio,relief="flat", bg=self.COLOR_PRIMARIO) 
-        self.espacio_vacio_2.grid(row=0,column=0)
-
-
-        # CREACION DE LAS IMAGENES DE LOS BOTONES        
-        self.btn_nuevo_image = PhotoImage(file=os.path.join( self.PATH_IMAGE,"nuevo3.png"))
-        self.btn_abrir_image = PhotoImage(file=os.path.join( self.PATH_IMAGE,"abrir3.png"))
-        self.btn_eliminar_image = PhotoImage(file=os.path.join( self.PATH_IMAGE,"eliminar.png"))
 
         # CREACION DE LOS BOTONES
-        self.btn_nuevo = Button(self.frame_botones, bg=self.COLOR_PRIMARIO, image=self.btn_nuevo_image, relief="flat", cursor="hand2")
-        self.btn_nuevo.grid(row=1,column=0,pady=15,padx=10)
+        self.btn_nuevo = ctk.CTkButton(master=self.frame_botones,text="Nuevo",text_font=("Cascade", 16),width=120,height=40,
+                                                border_width=3,corner_radius=8,cursor="hand2")
+        self.btn_nuevo.grid(row=0,column=0,pady=15,padx=20)
 
-        self.btn_abrir = Button(self.frame_botones, bg=self.COLOR_PRIMARIO, image=self.btn_abrir_image, relief="flat", cursor="hand2")
-        self.btn_abrir.grid(row=1, column=1,padx=10)
+        self.btn_abrir = ctk.CTkButton(master=self.frame_botones,text="Abrir",text_font=("Cascade", 16),width=120,height=40,
+                                                border_width=3,corner_radius=8,cursor="hand2", command = self.abrir)
+        self.btn_abrir.grid(row=0, column=1,padx=15)
 
-        self.btn_eliminar = Button(self.frame_botones, bg=self.COLOR_PRIMARIO, image=self.btn_eliminar_image, relief="flat", cursor="hand2")
-        self.btn_eliminar.grid(row=1, column=2,padx=8)
+        self.btn_eliminar = ctk.CTkButton(master=self.frame_botones,text="Eliminar",text_font=("Cascade", 16),width=120,height=40,
+                                                border_width=3,corner_radius=8,cursor="hand2")
+        self.btn_eliminar.grid(row=0, column=2,padx=13)
+
+    def abrir (self):
+        self.frame_calendario.tkraise()
+        App (self.frame_calendario, self)
+
 
 class Main (Parametros):
     """## Clase que genera el frame principal"""

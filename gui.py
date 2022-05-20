@@ -2,6 +2,7 @@
 
 from tkinter import *
 import tksheet as sheet
+import customtkinter
 import os
 import sys
 
@@ -108,9 +109,9 @@ class Portada (Parametros):
         popup_menu_bg                      = "#f2f2f2",
         popup_menu_highlight_bg            = "#91c9f7",
         popup_menu_highlight_fg            = "black",
-        frame_bg                           = self.COLOR_FONDO, # COLOR DEL FONDO DE LA TABLA
-        table_grid_fg                      = self.COLOR_PRIMARIO, # COLOR DE LAS LINEAS DE SEPARACION
-        table_bg                           = "#292E36", # COLOR FONDO DE TABLA PARTE DATOS
+        frame_bg                           = self.COLOR_FONDO, # COLOR_FONDO DEL FONDO DE LA TABLA
+        table_grid_fg                      = self.COLOR_PRIMARIO, # COLOR_FONDO DE LAS LINEAS DE SEPARACION
+        table_bg                           = "#292E36", # COLOR_FONDO FONDO DE TABLA PARTE DATOS
         table_fg                           = self.COLOR_FG, 
         table_selected_cells_border_fg     = self.COLOR_FONDO,
         table_selected_cells_bg            = self.COLOR_FONDO,
@@ -161,55 +162,56 @@ class Portada (Parametros):
 
 
     def buscador(self):
+        
         #Funcion que despliega el buscador y los botones 
-
         # CREACION DE LA IMAGEN BUSCAR
-        self.lbl_buscar_image = PhotoImage(file=os.path.join( self.PATH_IMAGE,"buscar.png"))
+        self.lbl_buscar_image = PhotoImage(file=os.path.join( self.PATH_IMAGE,"buscar2.png"))
 
         # CREACION DE FRAMES
 
         self.frame_buscador_child = Frame(self.frame_up, bg=self.COLOR_PRIMARIO)
         self.frame_buscador_child.grid(row=0, column=0)
 
-        self.frame_espacio = Frame (self.frame_up,bg=self.COLOR_PRIMARIO) 
-        self.frame_espacio.grid(row=0,column=1,rowspan=2, sticky=E,padx=50)
+        self.frame_espacio_vacio = Frame (self.frame_up,bg=self.COLOR_PRIMARIO)
+        self.frame_espacio_vacio.grid(row=0,column=1,padx=20)
 
-        self.frame_nuevo = Frame (self.frame_up,bg=self.COLOR_PRIMARIO)
-        self.frame_nuevo.grid(row=0,column=2,padx=5,rowspan=2,sticky=E)
+        self.frame_botones = Frame (self.frame_up,bg=self.COLOR_PRIMARIO)
+        self.frame_botones.grid(row=0,column=2,columnspan=3,rowspan=2)
 
-        self.frame_abrir = Frame (self.frame_up,bg=self.COLOR_PRIMARIO)
-        self.frame_abrir.grid(row=0,column=3,padx=5,rowspan=2,sticky=E)
 
         # CREACION DEL ENTRY
         self.text_search = StringVar()
 
-        self.entry_buscador = Entry(self.frame_buscador_child, textvariable=self.text_search, width=50, font=("Arial", 16))
+        self.entry_buscador = Entry(self.frame_buscador_child, textvariable=self.text_search, width=42, font=("Arial", 16))
         self.entry_buscador.grid(row=1,column=0, padx=3, sticky=N)
 
-        # CREACION DE LABELS VACIO PARA PODER PONER LOS BOTONES EN ROW=1
+
+        # CREACION DEL LABEL BUSCAR PROYECTO IMAGEN
         self.lbl_buscar = Label(self.frame_buscador_child, bg=self.COLOR_PRIMARIO, image=self.lbl_buscar_image, relief="flat")
         self.lbl_buscar.grid(row=0, column=0, sticky=W)
 
-        self.espacio = Label (self.frame_espacio,relief="flat", bg=self.COLOR_PRIMARIO) 
-        self.espacio.grid(row=0,column=0, sticky=W)
+        # CREACION DE LABELS VACIO 
+        self.espacio_vacio_1= Label (self.frame_botones,relief="flat", bg=self.COLOR_PRIMARIO) 
+        self.espacio_vacio_1.grid(row=0,column=0)
 
-        self.espacio_nuevo = Label (self.frame_nuevo,relief="flat", bg=self.COLOR_PRIMARIO)
-        self.espacio_nuevo.grid(row=0,column=0, sticky=W)
+        self.espacio_vacio_2 = Label (self.frame_espacio_vacio,relief="flat", bg=self.COLOR_PRIMARIO) 
+        self.espacio_vacio_2.grid(row=0,column=0)
 
-        self.espacio_abrir = Label (self.frame_abrir,relief="flat", bg=self.COLOR_PRIMARIO)
-        self.espacio_abrir.grid(row=0,column=0, sticky=W)
 
         # CREACION DE LAS IMAGENES DE LOS BOTONES        
-        print (os.path.join( self.PATH_IMAGE,"nuevo3.png"))
         self.btn_nuevo_image = PhotoImage(file=os.path.join( self.PATH_IMAGE,"nuevo3.png"))
         self.btn_abrir_image = PhotoImage(file=os.path.join( self.PATH_IMAGE,"abrir3.png"))
+        self.btn_eliminar_image = PhotoImage(file=os.path.join( self.PATH_IMAGE,"eliminar.png"))
 
         # CREACION DE LOS BOTONES
-        self.btn_nuevo = Button(self.frame_nuevo, bg=self.COLOR_PRIMARIO, image=self.btn_nuevo_image, relief="flat", cursor="hand2")
-        self.btn_nuevo.grid(row=1,column=0,pady=15)
+        self.btn_nuevo = Button(self.frame_botones, bg=self.COLOR_PRIMARIO, image=self.btn_nuevo_image, relief="flat", cursor="hand2")
+        self.btn_nuevo.grid(row=1,column=0,pady=15,padx=10)
 
-        self.btn_abrir = Button(self.frame_abrir, bg=self.COLOR_PRIMARIO, image=self.btn_abrir_image, relief="flat", cursor="hand2")
-        self.btn_abrir.grid(row=1, column=0)
+        self.btn_abrir = Button(self.frame_botones, bg=self.COLOR_PRIMARIO, image=self.btn_abrir_image, relief="flat", cursor="hand2")
+        self.btn_abrir.grid(row=1, column=1,padx=10)
+
+        self.btn_eliminar = Button(self.frame_botones, bg=self.COLOR_PRIMARIO, image=self.btn_eliminar_image, relief="flat", cursor="hand2")
+        self.btn_eliminar.grid(row=1, column=2,padx=8)
 
 class Main (Parametros):
     """## Clase que genera el frame principal"""
@@ -218,13 +220,18 @@ class Main (Parametros):
         super().__init__()
         """### Creación y configuracion de la pagina principal"""
 
-        self.RAIZ = Tk("Adminstrador de proyectos", "Administrador de proyectos")
+
+        customtkinter.set_default_color_theme("blue")
+        #self.RAIZ = Tk("Adminstrador de proyectos", "Administrador de proyectos")
+        self.RAIZ = customtkinter.CTk()
         self.RAIZ.geometry(f'{self.ANCHO}x{self.ALTO}')
         self.RAIZ.resizable(False, False)
         self.RAIZ.title("Administrador de proyectos")
         self.RAIZ.config(bg=self.COLOR_FONDO)
         self.center (self.RAIZ)
         Portada(self.RAIZ)
+
+
 
         self.RAIZ.mainloop()
         pass

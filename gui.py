@@ -8,6 +8,10 @@ import os
 import sys
 import datetime
 
+#AGREGADO POR SEBAS VERA
+from PIL import Image, ImageTk
+
+
 class Parametros ():
     def __init__(self) -> None: 
         self.ANCHO = '1120'
@@ -29,10 +33,28 @@ class Parametros ():
 
         return os.path.join(base_path)
 
+    def center(self, win):
+        """
+        ## Función que centra una ventana en la pantalla
+        - param win: la ventana principal o frame a centrar
+        """
+        win.update_idletasks()
+        width = win.winfo_width()
+        frm_width = win.winfo_rootx() - win.winfo_x()
+        win_width = width + 2 * frm_width
+        height = win.winfo_height()
+        titlebar_height = win.winfo_rooty() - win.winfo_y()
+        win_height = height + titlebar_height + frm_width
+        x = win.winfo_screenwidth() // 2 - win_width // 2
+        y = win.winfo_screenheight() // 2 - win_height // 2
+        win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+        win.deiconify()
 
-class App():
+
+class App(Parametros):
 
     def __init__(self, master, parent):
+        super().__init__()
         self.PARTENT = parent
         self.MASTER = master
         self.MASTER.grid_columnconfigure(1, weight=1)
@@ -76,8 +98,18 @@ class App():
                                                 command=self.ir_a_inicio)
         self.button_3.grid(row=4, column=0, pady=10, padx=20)
 
+
+
+
         """self.switch_1 = ctk.CTkSwitch(master=self.frame_left)
         self.switch_1.grid(row=9, column=0, pady=10, padx=20, sticky="w")"""
+        self.logo_img = PhotoImage (file= os.path.join (self.PATH_IMAGE, "logo.png"))
+
+        self.logo = Label(master=self.frame_left,
+                                      image= self.logo_img, bg = self.COLOR_PRIMARIO
+                                      )
+
+        self.logo.grid(row=9, column=0, pady=10, padx=10)
 
         """self.switch_2 = ctk.CTkSwitch(master=self.frame_left,
                                                 text="Modo oscuro",
@@ -116,6 +148,90 @@ class App():
     def start(self):
         self.mainloop()
 
+class WindowProject(Parametros):
+    """
+    ## Clase que genera la pestaña para cargar nuevo proyecto
+    ### Editor: Sebastian Vera
+    """
+    width = 600
+    height = 600
+
+    def __init__(self):
+        super().__init__()
+
+        ctk.set_appearance_mode("Dark")
+        ctk.set_default_color_theme("blue")
+        self.MASTER = ctk.CTkToplevel()
+        self.MASTER.geometry(f"{WindowProject.width}x{WindowProject.height}")
+        self.MASTER.minsize(WindowProject.width, WindowProject.height)
+        self.MASTER.maxsize(WindowProject.width, WindowProject.height)
+        self.center (self.MASTER)
+
+
+        # cargar imagen de fondo
+        image = Image.open(os.path.join(self.PATH_IMAGE, "fondo.jpg")).resize((self.width, self.height))
+        self.bg_image = ImageTk.PhotoImage(image)
+        self.image_label = Label(self.MASTER, image=self.bg_image)
+        self.image_label.place(relx=0.5, rely=0.5, anchor=CENTER)
+
+
+        # main frame
+        self.frame = ctk.CTkFrame(self.MASTER, width=300, height=WindowProject.height, corner_radius=10)
+        self.frame.place(relx=0.5, rely=0.5, anchor=CENTER)
+
+
+        # projechub logo
+        logo = Image.open(os.path.join(self.PATH_IMAGE,"logo.png")).resize((136,32))
+        self.projechub = ImageTk.PhotoImage(logo)
+        self.projechub_label = Label(self.frame, image=self.projechub)
+        self.projechub_label.config(bg="gray18")
+        self.projechub_label.place(relx=0.3, rely=0.1)
+
+
+        # Nombre del Proyecto
+        self.frame_NP = ctk.CTkFrame(master=self.frame, width=220, height=70, corner_radius=20)
+        self.frame_NP.place(relx=0.5, rely=0.2, anchor=N)
+
+        self.label_NP = ctk.CTkLabel(self.frame_NP, corner_radius=10, width=200, height=30, fg_color=("#3d5a80"), text="Nombre del Proyecto")
+        self.label_NP.place(relx=0.5, rely=0.3, anchor=CENTER)
+
+        self.nombre_proyecto = ctk.CTkEntry(master=self.frame_NP, width=200, placeholder_text="nuevo_proyecto")
+        self.nombre_proyecto.place(relx=0.5, rely=0.75, anchor=CENTER)
+
+
+        # Descripcion del Proyecto
+        self.frame_DP = ctk.CTkFrame(master=self.frame, corner_radius=20, width=220, height=200)
+        self.frame_DP.place(relx=0.5, rely=0.5, anchor=CENTER)
+
+        self.label_DP = ctk.CTkLabel(master=self.frame_DP, corner_radius=20, width=200, height=20, fg_color=("#3d5a80"), text="Descripcion del Proyecto")
+        self.label_DP.place(relx=0.5, rely=0.1, anchor=CENTER)
+
+        self.descripcion_proyecto = ctk.CTkEntry(master=self.frame_DP, width=200, height=150, placeholder_text="descripcion_proyecto", bg="gray18")
+        self.descripcion_proyecto.place(relx=0.5, rely=0.55, anchor=CENTER)
+
+
+        # Fecha de Inicio
+        self.frame_FP = ctk.CTkFrame(self.frame, width=220, height=50, corner_radius=20)
+        self.frame_FP.place(relx=0.5, rely=0.76, anchor=CENTER)
+
+        self.label_FP = ctk.CTkLabel(self.frame_FP, width=200, height=20, text="Fecha de Inicio", fg_color="#3d5a80")
+        self.label_FP.place(relx=0.5, rely=0.25, anchor=CENTER)
+
+        button_FP = DateEntry(self.frame_FP, width=12, background="gray18",foreground="gray18", borderwidth=2, year=2022)
+        button_FP.pack(padx=10, pady=10)
+
+        self.button_cargar = ctk.CTkButton(master =self.frame, text= "GUARDAR DATOS", width=280, height=40, fg_color= "#3d5a80", command=self.button_event)
+        self.button_cargar.place(relx=0.5, rely=0.9, anchor=CENTER)
+
+
+    def button_event(self):
+        """# Obtencion de datos para cargar"""
+        print("Nombre:", self.nombre_proyecto.get(), "Descripcion:", self.descripcion_proyecto.get())
+    
+    
+    def start(self):
+        self.mainloop()
+
 
 class Portada (Parametros):
     """## Clase que genera una portada"""
@@ -150,9 +266,9 @@ class Portada (Parametros):
 
     def data_manage (self):
         self.data = []
-        for proyecto in self.LISTA_PROYECTOS:
-            self.data.append ([proyecto.name, proyecto.description, proyecto.startdate, "0%"])
-            #print (proyecto.name)
+        if self.LISTA_PROYECTOS:
+            for proyecto in self.LISTA_PROYECTOS:
+                self.data.append ([proyecto.name, proyecto.description, proyecto.startdate, "0%"])
         
 
     def desplegar_tabla (self):
@@ -295,7 +411,7 @@ class Portada (Parametros):
 
         # CREACION DE LOS BOTONES
         self.btn_nuevo = ctk.CTkButton(master=self.frame_botones,text="Nuevo",text_font=("Cascade", 16),width=120,height=40,
-                                                border_width=3,corner_radius=8,cursor="hand2")
+                                                border_width=3,corner_radius=8,cursor="hand2", command= self.nuevo_proyecto)
         self.btn_nuevo.grid(row=0,column=0,pady=15,padx=20)
 
         self.btn_abrir = ctk.CTkButton(master=self.frame_botones,text="Abrir",text_font=("Cascade", 16),width=120,height=40,
@@ -310,6 +426,8 @@ class Portada (Parametros):
         self.frame_calendario.tkraise()
         App (self.frame_calendario, self)
 
+    def nuevo_proyecto (self):
+        WindowProject()
 
 class Main (Parametros):
     """## Clase que genera el frame principal"""
@@ -324,7 +442,7 @@ class Main (Parametros):
         self.RAIZ = ctk.CTk()
         self.RAIZ.geometry(f'{self.ANCHO}x{self.ALTO}')
         self.RAIZ.resizable(False, False)
-        self.RAIZ.title("Administrador de proyectos")
+        self.RAIZ.title("Project hub")
         self.RAIZ.config(bg=self.COLOR_FONDO)
         self.center (self.RAIZ)
         Portada(self.RAIZ, lista_proyectos)
@@ -334,23 +452,6 @@ class Main (Parametros):
         self.RAIZ.mainloop()
         pass
         
-    
-    def center(self, win):
-        """
-        ## Función que centra una ventana en la pantalla
-        - param win: la ventana principal o frame a centrar
-        """
-        win.update_idletasks()
-        width = win.winfo_width()
-        frm_width = win.winfo_rootx() - win.winfo_x()
-        win_width = width + 2 * frm_width
-        height = win.winfo_height()
-        titlebar_height = win.winfo_rooty() - win.winfo_y()
-        win_height = height + titlebar_height + frm_width
-        x = win.winfo_screenwidth() // 2 - win_width // 2
-        y = win.winfo_screenheight() // 2 - win_height // 2
-        win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
-        win.deiconify()
     
 if __name__ == "__main__":
     Main()

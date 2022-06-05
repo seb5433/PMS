@@ -1,5 +1,6 @@
 # GUI del administrador de proyectos
 
+import json
 from tkinter import *
 from tkcalendar import *
 import tksheet as sheet
@@ -23,6 +24,7 @@ class Parametros ():
         self.PATH = self.resource_path()
         self.PATH_IMAGE = os.path.join (self.PATH,'images')
         self.PATH_CONFIG = os.path.join (self.PATH,'config')
+        self.PATH_DATA = os.path.join (self.PATH,'data')
 
     def resource_path(self):
         try:
@@ -53,8 +55,10 @@ class Parametros ():
 
 class App(Parametros):
 
-    def __init__(self, master, parent):
+    def __init__(self, master, parent, project):
         super().__init__()
+        for x in project["actividades"]:
+            print (x["fechaini"])
         self.PARTENT = parent
         self.MASTER = master
         self.MASTER.grid_columnconfigure(1, weight=1)
@@ -65,74 +69,62 @@ class App(Parametros):
                                                  corner_radius=0)
         self.frame_left.grid(row=0, column=0, sticky="nswe")
 
-        self.frame_right = ctk.CTkFrame(master=self.MASTER)
-        self.frame_right.grid(row=0, column=1, sticky="nswe", padx=20, pady=20)
+        self.frame_right_activity = ctk.CTkFrame(master=self.MASTER)
+        self.frame_right_activity.grid(row=0, column=1, sticky="nswe", padx=20, pady=20)
+        self.frame_right_calendar = ctk.CTkFrame(master=self.MASTER)
+        self.frame_right_calendar.grid(row=0, column=1, sticky="nswe", padx=20, pady=20)
 
         # ============ frame_left ============
 
         # configure grid layout (1x11)
         self.frame_left.grid_rowconfigure(0, minsize=10)   # empty row with minsize as spacing
-        self.frame_left.grid_rowconfigure(5, weight=1)  # empty row as spacing
+        self.frame_left.grid_rowconfigure(6, weight=1)  # empty row as spacing
         self.frame_left.grid_rowconfigure(8, minsize=20)    # empty row with minsize as spacing
         self.frame_left.grid_rowconfigure(11, minsize=10)  # empty row with minsize as spacing
 
-        self.label_1 = ctk.CTkLabel(master=self.frame_left,
-                                              text="Navegación",
-                                              text_font=("Roboto Medium", -20),
-                                              text_color = "white",
-                                              )  # font name and size in px
+        self.label_1 = ctk.CTkLabel(master=self.frame_left, text="Navegación", text_font=("Roboto Medium", -20), text_color = "white",)  # font name and size in px
         self.label_1.grid(row=1, column=0, pady=10, padx=10)
 
-        self.button_1 = ctk.CTkButton(master=self.frame_left,
-                                                text="Actividades",
-                                                command=self.button_event)
+        self.button_1 = ctk.CTkButton(master=self.frame_left, text="Calendario", command=self.open_calendario)
         self.button_1.grid(row=2, column=0, pady=10, padx=20)
 
-        self.button_2 = ctk.CTkButton(master=self.frame_left,
-                                                text="Reporte",
-                                                command=self.button_event)
+        self.button_2 = ctk.CTkButton(master=self.frame_left, text="Actividades", command=self.open_actividades)
         self.button_2.grid(row=3, column=0, pady=10, padx=20)
 
-        self.button_3 = ctk.CTkButton(master=self.frame_left,
-                                                text="Ir a inicio",
-                                                command=self.ir_a_inicio)
+        self.button_3 = ctk.CTkButton(master=self.frame_left, text="Reporte", command=self.button_event)
         self.button_3.grid(row=4, column=0, pady=10, padx=20)
 
+        self.button_4 = ctk.CTkButton(master=self.frame_left, text="Ir a inicio", command=self.ir_a_inicio)
+        self.button_4.grid(row=5, column=0, pady=10, padx=20)
 
-
-
-        """self.switch_1 = ctk.CTkSwitch(master=self.frame_left)
-        self.switch_1.grid(row=9, column=0, pady=10, padx=20, sticky="w")"""
         self.logo_img = PhotoImage (file= os.path.join (self.PATH_IMAGE, "logo.png"))
 
-        self.logo = Label(master=self.frame_left,
-                                      image= self.logo_img, bg = self.COLOR_PRIMARIO
-                                      )
+        self.logo = Label(master=self.frame_left, image= self.logo_img, bg = self.COLOR_PRIMARIO)
 
         self.logo.grid(row=9, column=0, pady=10, padx=10)
 
-        """self.switch_2 = ctk.CTkSwitch(master=self.frame_left,
-                                                text="Modo oscuro",
-                                                command=self.change_mode,
-                                                text_color = "white",)
-        self.switch_2.grid(row=10, column=0, pady=10, padx=20, sticky="w")"""
-
-
-        self.frame_right.rowconfigure((0), weight=1)
+        self.frame_right_calendar.rowconfigure((0), weight=1)
 
         today = datetime.date.today()
         mindate = datetime.date(year=2018, month=1, day=21)
         maxdate = today + datetime.timedelta(days=960)
         print(mindate, maxdate)
 
-        cal = Calendar(self.frame_right, font="Cascade 13", selectmode='day', locale='es_ES',
-                    mindate=mindate, maxdate=maxdate, disabledforeground='red',
-                    cursor="hand2", year=2022, month=5, day=20)
+        cal = Calendar(self.frame_right_calendar, font="Cascade 13", selectmode='day', locale='es_ES', mindate=mindate, maxdate=maxdate, disabledforeground='red', cursor="hand2", year=2022, month=5, day=20)
         cal.pack(fill="both", expand=True)
+
+        self.MASTER.mainloop()
+
 
     def button_event(self):
         pass
+    
+    def open_actividades (self):
+        self.frame_right_activity.tkraise()
 
+    def open_calendario (self):
+        self.frame_right_calendar.tkraise()
+    
     def ir_a_inicio (self):
         self.PARTENT.frame_portada.tkraise()
 
@@ -159,8 +151,6 @@ class WindowProject(Parametros):
     def __init__(self):
         super().__init__()
 
-        ctk.set_appearance_mode("Dark")
-        ctk.set_default_color_theme("blue")
         self.MASTER = ctk.CTkToplevel()
         self.MASTER.geometry(f"{WindowProject.width}x{WindowProject.height}")
         self.MASTER.minsize(WindowProject.width, WindowProject.height)
@@ -229,8 +219,6 @@ class WindowProject(Parametros):
         print("Nombre:", self.nombre_proyecto.get(), "Descripcion:", self.descripcion_proyecto.get())
     
     
-    def start(self):
-        self.mainloop()
 
 
 class Portada (Parametros):
@@ -254,7 +242,7 @@ class Portada (Parametros):
         
 
         self.frame_up = Frame (self.frame_portada, bg = self.COLOR_PRIMARIO)
-        self.frame_down = Frame (self.frame_portada, bg = self.COLOR_PRIMARIO)
+        self.frame_down = Frame (self.frame_portada, bg = self.COLOR_PRIMARIO, cursor = "hand2")
         self.frame_up.pack (side = TOP, padx = 10, pady = 10, fill = "both")
         self.frame_down.pack (side = TOP, padx = 10, fill = "both",expand=True)
         self.desplegar_tabla()
@@ -262,13 +250,15 @@ class Portada (Parametros):
         #self.abrir()
 
         self.MASTER.mainloop()
-        pass
 
     def data_manage (self):
         self.data = []
+        self.IDES = []
         if self.LISTA_PROYECTOS:
             for proyecto in self.LISTA_PROYECTOS:
                 self.data.append ([proyecto.name, proyecto.description, proyecto.startdate, "0%"])
+                self.IDES.append (proyecto.id)
+        
         
 
     def desplegar_tabla (self):
@@ -276,10 +266,10 @@ class Portada (Parametros):
         self.tabla_proyectos = sheet.Sheet(self.frame_down,headers= ['Proyecto', 'Descripción', 'Inicio', 'Avance'],data= self.data,
         show_table = True,
         show_top_left = False,
-        show_row_index = True,
+        show_row_index = False,
         show_header = True,
         show_x_scrollbar = True,
-        show_y_scrollbar = True,
+        show_y_scrollbar = False,
         width = None,
         height = None,
         default_header = "letters", #letters, numbers or both
@@ -309,9 +299,6 @@ class Portada (Parametros):
         auto_resize_default_row_index = True,
         set_all_heights_and_widths = False,
         row_height = "2",
-        #font = get_font(),
-        #header_font = get_heading_font(),
-        #popup_menu_font = get_font(),
         align = "w",
         header_align = "center",
         row_index_align = "center",
@@ -319,18 +306,14 @@ class Portada (Parametros):
         all_columns_displayed = True,
         max_undos = 20,
         outline_thickness = 0,
-        #outline_color = theme_light_blue['outline_color'],
         column_drag_and_drop_perform = True,
         row_drag_and_drop_perform = True,
         empty_horizontal = 0,
         empty_vertical = 0,
-        ##selected_rows_to_end_of_window = False,
-        ##horizontal_grid_to_end_of_window = False,
-        ##vertical_grid_to_end_of_window = False,
         show_vertical_grid = True,
         show_horizontal_grid = True,
         display_selected_fg_over_highlights = False,
-        show_selected_cells_border = False,
+        show_selected_cells_border = False, 
         theme = "dark",
         popup_menu_fg                      = "gray2",
         popup_menu_bg                      = "#f2f2f2",
@@ -376,7 +359,8 @@ class Portada (Parametros):
         top_left_fg                        = self.COLOR_FONDO,
         top_left_fg_highlight              = self.COLOR_FONDO,
         )
-        self.tabla_proyectos.header_font(newfont = ("Cascade", 16, "normal"))
+
+        self.tabla_proyectos.header_font(newfont = ("Cascade", 10, "normal"))
         self.tabla_proyectos.enable_bindings()
         self.tabla_proyectos.header_align(align = "center", redraw = True)
         self.tabla_proyectos.align_columns(columns = [2,3], align = "center", align_header = True, redraw = True)
@@ -384,8 +368,18 @@ class Portada (Parametros):
         self.tabla_proyectos.column_width(column = 1, width = 630, only_set_if_too_small = False, redraw = True)
         self.tabla_proyectos.column_width(column = 2, width = 130, only_set_if_too_small = False, redraw = True)
         self.tabla_proyectos.column_width(column = 3, width = 120, only_set_if_too_small = False, redraw = True)
-        #self.tabla_proyectos.set_all_cell_sizes_to_text(redraw = True)
+
+        self.tabla_proyectos.disable_bindings("all")
+        self.tabla_proyectos.bind ("<ButtonPress-1>", self.selected)
+
+        self.tabla_proyectos.row_index(newindex = self.IDES, index = None) # Colocacion de las IDES
         self.tabla_proyectos.pack ( fill = "both", padx = 20,pady = 5, expand = True)
+
+
+    def selected (self, binded):
+        self.row = self.tabla_proyectos.identify_row(binded)
+        self.tabla_proyectos.dehighlight_all()
+        self.tabla_proyectos.highlight_rows(rows = [self.row], bg = "#264779", fg = "Black", highlight_index = True, redraw = True)
 
 
     def buscador(self):
@@ -405,26 +399,31 @@ class Portada (Parametros):
 
         # CREACION DEL ENTRY
 
-        self.entry_buscador = ctk.CTkEntry(master=self.frame_buscador_child,text_font=("Cascade", 16),placeholder_text="Buscar proyecto...",width=500,height=40,fg_color=self.COLOR_FONDO)
+        self.entry_buscador = ctk.CTkEntry(master=self.frame_buscador_child,text_font=("Cascade", 12),placeholder_text="Buscar proyecto...",width=500,height=40,fg_color=self.COLOR_FONDO, text_color= "#768390")
         self.entry_buscador.pack(padx=20)
 
 
         # CREACION DE LOS BOTONES
-        self.btn_nuevo = ctk.CTkButton(master=self.frame_botones,text="Nuevo",text_font=("Cascade", 16),width=120,height=40,
-                                                border_width=3,corner_radius=8,cursor="hand2", command= self.nuevo_proyecto)
+        self.btn_nuevo = ctk.CTkButton(master=self.frame_botones,text="Nuevo",text_font=("Cascade", 14),width=120,height=40,
+                                                border_width=1,corner_radius=5,cursor="hand2", command= self.nuevo_proyecto)
         self.btn_nuevo.grid(row=0,column=0,pady=15,padx=20)
 
-        self.btn_abrir = ctk.CTkButton(master=self.frame_botones,text="Abrir",text_font=("Cascade", 16),width=120,height=40,
-                                                border_width=3,corner_radius=8,cursor="hand2", command = self.abrir)
+        self.btn_abrir = ctk.CTkButton(master=self.frame_botones,text="Abrir",text_font=("Cascade", 14),width=120,height=40,
+                                                border_width=1,corner_radius=5,cursor="hand2", command = self.abrir, fg_color= "#238636")
         self.btn_abrir.grid(row=0, column=1,padx=15)
 
-        self.btn_eliminar = ctk.CTkButton(master=self.frame_botones,text="Eliminar",text_font=("Cascade", 16),width=120,height=40,
-                                                border_width=3,corner_radius=8,cursor="hand2")
+        self.btn_eliminar = ctk.CTkButton(master=self.frame_botones,text="Eliminar",text_font=("Cascade", 14),width=120,height=40,
+                                                border_width=1,corner_radius=5,cursor="hand2")
         self.btn_eliminar.grid(row=0, column=2,padx=13)
 
     def abrir (self):
+        project = self.tabla_proyectos.get_sheet_data(get_index = True)[self.row]
+        project_dict = {}
+        with open (os.path.join(self.PATH_DATA, f"p_{project[0]}.json"), "r") as FILE:
+            project_dict = json.loads (FILE.read())
+            
         self.frame_calendario.tkraise()
-        App (self.frame_calendario, self)
+        App (self.frame_calendario, self, project_dict)
 
     def nuevo_proyecto (self):
         WindowProject()
@@ -450,7 +449,6 @@ class Main (Parametros):
 
 
         self.RAIZ.mainloop()
-        pass
         
     
 if __name__ == "__main__":

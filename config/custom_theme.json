@@ -1,9 +1,9 @@
 {
     "color": {
       "window_bg_color": ["gray98", "#1C2128"],
-      "button": ["#608BD5", "#316DCA"],
-      "button_hover": ["#A4BDE6", "#22272E"],
-      "button_border": ["gray40", "#22272E"],
+      "button": ["#30363d", "#30363d"],
+      "button_hover": ["#A4BDE6", "#A4BDE6"],
+      "button_border": ["#8b949e", "#8b949e"],
       "hover_color" : ["white", "white"],
       "checkbox_border": ["gray40", "gray60"],
       "checkmark": ["white", "gray90"],
@@ -11,12 +11,12 @@
       "entry_border": ["gray70", "#768390"],
       "entry_placeholder_text": ["gray52", "gray62"],
       "frame_border": ["#A7C2E0", "#5FB4DD"],
-      "frame_low": ["gray92", "#22272E"],
-      "frame_high": ["gray86", "gray20"],
+      "frame_low": ["#22272E", "#22272E"],
+      "frame_high": ["#22272E", "gray20"],
       "label": [null, null],
-      "text": ["gray12", "#1C2128"],
-      "text_disabled": ["gray60", "gray50"],
-      "text_button_disabled": ["gray40", "gray74"],
+      "text": ["#c9d1d9", "#c9d1d9"],
+      "text_disabled": ["gray60", "22272E"],
+      "text_button_disabled": ["22272E", "22272E"],
       "progressbar": ["#6B6B6B", "gray0"],
       "progressbar_progress": ["#608BD5", "#395E9C"],
       "progressbar_border": ["gray", "gray"],
@@ -36,7 +36,7 @@
         "size": -13
       },
       "Windows": {
-        "font": "Cascade",
+        "font": "Segoe UI",
         "size": -13
       },
       "Linux": {
@@ -45,8 +45,8 @@
       }
     },
     "shape": {
-      "button_corner_radius": 8,
-      "button_border_width": 0,
+      "button_corner_radius": 5,
+      "button_border_width": 1,
       "checkbox_corner_radius": 7,
       "checkbox_border_width": 3,
       "radiobutton_corner_radius": 1000,

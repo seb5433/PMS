@@ -2,6 +2,10 @@
 
 import json
 from tkinter import *
+import tkinter
+from tkinter.ttk import Treeview
+from customtkinter.widgets.ctk_canvas import CTkCanvas
+from customtkinter.windows.ctk_tk import CTk
 from tkcalendar import *
 import tksheet as sheet
 import customtkinter as ctk
@@ -121,12 +125,35 @@ class App(Parametros):
     
     def open_actividades (self):
         self.frame_right_activity.tkraise()
+        self.activity()
 
     def open_calendario (self):
         self.frame_right_calendar.tkraise()
     
     def ir_a_inicio (self):
         self.PARTENT.frame_portada.tkraise()
+
+    def activity (self):
+        columns = ("Actividad", "Duracion")
+        self.activity_tree =  Treeview(self.frame_right_activity,columns = columns)
+        self.activity_tree.pack (expand=True)
+
+        self.activity_tree.heading ("Actividad", text= "Actividad")
+        self.activity_tree.heading ("Duracion", text= "Duracion")
+
+        # generate sample data
+        contacts = []
+        for n in range(1, 100):
+            contacts.append((f'first {n}', f'last {n}', f'email{n}@example.com'))
+
+        # add data to the treeview
+        x = 0
+        for contact in contacts:
+            self.activity_tree.insert('', END, iid= f"{x}", values=contact)
+            x += 1
+
+        
+        self.activity_tree.insert ("1",END, values= ["Que onda", "Perron"])
 
     def change_mode(self):
         if self.switch_2.get() == 1:
@@ -444,6 +471,14 @@ class Main (Parametros):
         self.RAIZ.title("Project hub")
         self.RAIZ.config(bg=self.COLOR_FONDO)
         self.center (self.RAIZ)
+
+        self.menu = Menu (self.RAIZ)
+        self.RAIZ.config (menu = self.menu)
+        fileMenu = Menu(self.menu)
+        self.menu.add_cascade(label="Configuracion", menu=fileMenu, hidemargin= True)
+        fileMenu.add_command(label="Feriados")
+        fileMenu.add_command(label="Dias laborales")
+
         Portada(self.RAIZ, lista_proyectos)
 
 

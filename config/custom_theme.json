@@ -14,7 +14,7 @@
       "frame_low": ["#22272E", "#22272E"],
       "frame_high": ["#22272E", "gray20"],
       "label": [null, null],
-      "text": ["#c9d1d9", "#c9d1d9"],
+      "text": ["#FFFFFF", "#c9d1d9"],
       "text_disabled": ["gray60", "22272E"],
       "text_button_disabled": ["22272E", "22272E"],
       "progressbar": ["#6B6B6B", "gray0"],

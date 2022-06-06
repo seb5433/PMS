@@ -1,18 +1,30 @@
-
 import json
 import tkinter as tk
 from tkinter import ttk
+
 from .date_entry import *
+import os
+from datetime import timedelta
+
+#Librerias para el camino criticoy diagrama de Gantt
+from .caminocritico import Node
+import locale
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from matplotlib.patches import Patch
+
+
 
 class Project():
     def __init__(self, nombre, numero, descripcion, fecha):
-        self.name = nombre
+        self.nombre = nombre
         self.id = numero
-        self.description = descripcion
-        self.startdate = fecha
-        self.endingdate = None
-        self.activitidades = []
-        self.relations = []
+        self.descripcion = descripcion
+        self.fecha_inicio = fecha
+        self.actividades = []
+        self.relaciones = []
 
     """
     Metodos de manejo de proyectos
@@ -21,13 +33,12 @@ class Project():
     def __view_project(self):
         print('\n')
         self.project_resume()
-        print(f'Descripcion: {self.description}')
-        print(f'Fecha de inicio: {self.startdate}')
-        print(f"Fecha de finalizacion: {self.endingdate}")
+        print(f'Descripcion: {self.descripcion}')
+        print(f'Fecha de inicio: {self.fecha_inicio}')
     
     #Despliega el ID y nombre del proyecto
     def project_resume(self):
-        print(f"ID: [{self.id}] Nombre: {self.name}")
+        print(f"ID: [{self.id}] Nombre: {self.nombre}")
     
     #Metodo de clase para agregar un proyecto nuevo
     @classmethod
@@ -40,7 +51,20 @@ class Project():
         with open("config/config.json", "w") as file:
             info["id"] = config
             json.dump(info, file, indent = 4)
-            
+
+        return lista_proyectos
+    
+    #Metodo para eliminar un proyecto completo
+    @classmethod
+    def del_project(cls, lista_proyectos, numero):
+        ident = None
+        for k in range(len(lista_proyectos)):
+            if (lista_proyectos[k].id == numero):
+                ident = k
+        if ident != None:
+            del lista_proyectos[ident]
+            os.remove("./data/p_"+str(numero)+".json")
+        return lista_proyectos
 
     #Metodo de clase para desplegar la descripcion de
     #los proyectos
@@ -53,10 +77,8 @@ class Project():
     #con su nombre y ID
     @classmethod
     def projects_list(cls, lista_proyectos):
-        k = 0
         for project in lista_proyectos:
-            print(f"[{k}] Nombre: {project.name}")
-            k += 1
+            print(f"[{project.id}] Nombre: {project.nombre}")
 
     """
     Metodos de manejo para las actividades
@@ -64,60 +86,162 @@ class Project():
     #Metodo para AGREGAR una nueva actividad al objeto 
     #tipo proyecto
     def new_activity(self, nombre, duracion, fecha):
-        if len(self.activitidades) == 0:
+        if len(self.actividades) == 0:
             numero = 0
         else:
-            numero = self.activitidades[-1].id + 1
-        self.activitidades.append(Activity(nombre, numero, 
+            numero = self.actividades[-1].id + 1
+        self.actividades.append(Activity(nombre, numero, 
                                             duracion, fecha))
         self.update()
         return numero
 
     #Metodo para cargar las actividades desde los JSON
     #desde la funcion dowload()
-    def load_activity(self, nombre, numero, duracion, fecha, fechaf):
-        self.activitidades.append(Activity(nombre, numero, 
+    def load_activity(self, nombre, numero, duracion, fecha):
+        self.actividades.append(Activity(nombre, numero, 
                                             duracion, fecha))
-        self.late_start = fechaf
 
     #Metodo para visualizar la descripcion de las actividades
     #de un proyecto
     def view_activities(self):
-        for activity in self.activitidades:
+        for activity in self.actividades:
             activity.activity_description()
     
     #Metodo para visualizar la lista de activiades
     #de un proyecto
     def activities_list(self):
-        for activity in self.activitidades:
+        for activity in self.actividades:
             activity.activity_resume()
+
+    #Metodo para eliminar una actividad
+    def del_activity(self, numero):
+        ident = None
+        for k in range (len(self.actividades)):
+            if self.actividades[k].id == numero:
+                ident = k
+        if ident != None:
+            del self.actividades[ident]
+            self.update()
+            self.del_relation2(numero)
+
+    #Metodo para obtener la lista con los IDs de las actividades
+    #que estan en el camino critico de un proyecto, osea tienen que
+    #hacer self.actividades_criticas nomas y verificar 
+    #si str(actividad.id) in self.actividades+_criticas() es False
+    def actividades_criticas(self):
+        p = Node("")
+        for k in self.actividades:
+            p.add(Node(str(k.id), duration = int(k.duracion)))
+        for k in self.relaciones:
+            p.link(str(k.preceding), str(k.next))
+        p.update_all()
+        camino = [str(n) for n in p.get_critical_path()]
+        return camino
+
+    #Metodo para desplegar el diagrama de Gantt
+    def diagrama(self):
+        camino = self.actividades_criticas()
+        
+        with open("config/diagrama.csv", "w", encoding = "utf-8") as FILE:
+            FILE.write("name,start,end,critical")
+            for actividad in self.actividades:
+                FILE.write(f"\n{actividad.nombre},{actividad.fecha_inicio},{actividad.fecha_inicio + timedelta(days = int(actividad.duracion))},{is_critic(str(actividad.id), camino)}")
+
+        csv = pd.read_csv("config/diagrama.csv")
+        
+        csv["start"] = pd.to_datetime(csv["start"], format = "%Y-%m-%d")
+        csv["end"] = pd.to_datetime(csv["end"], format = "%Y-%m-%d")
+        
+        csv.sort_values("start", axis=0, ascending=True, inplace=True)
+        csv.reset_index(drop=True, inplace= True)
+        
+        color_dict = {'y':'red', 'n':'blue'}
+        
+        csv["Duration"] = csv["end"] - csv["start"] + timedelta(days = 1)
+        
+        csv["PastTime"] = csv["start"] - csv["start"][0]
+        
+        nrow = len(csv)
+        
+        plt.figure(num = 1, figsize = (10, 6), 
+                   dpi = 100)
+        bar_width = 0.9
+        
+        for i in range (nrow):
+            i_rev = nrow - 1 - i
+            plt.broken_barh([(csv["start"][i_rev], csv["Duration"][i_rev])], (i - bar_width / 2, bar_width), color = color_dict[str(csv["critical"][i_rev])])
+            plt.broken_barh([(csv["start"][0], csv["PastTime"][i_rev])], (i - bar_width / 2, bar_width), color = "white")
+        
+        y_pos = np.arange(nrow)
+        
+        plt.yticks(y_pos, labels= reversed(csv["name"]))
+        
+        #Poner en formato MES-dias
+        locale.setlocale(locale.LC_TIME, 'es_ES')
+        plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter(fmt= "%b-%y"))
+        plt.gca().xaxis.set_minor_locator(mdates.WeekdayLocator(byweekday=0))
+        
+        
+        plt.grid(axis="x", which="major", lw=1)
+        plt.grid(axis="x", which="minor", ls="--", lw=1)
+        
+        plt.gcf().autofmt_xdate(rotation=30)
+        plt.xlim(csv["start"][0],)
+        plt.xlabel("Fecha", fontsize=12, weight="bold")
+        plt.title(f"Diagrama de Gantt - Proyecto: {self.nombre}", fontsize = 12, weight = "bold")
+        plt.tight_layout(pad=0.8)
+        
+        #Anexar leyendas
+        leyend_dict = {"Camino critico" : "red", "Actividad no critica" : "blue"}
+        leyenda = [Patch(facecolor=leyend_dict[i], label=i)  for i in leyend_dict]
+        plt.legend(handles=leyenda)
+ 
+        plt.show()
+
 
     """
     Metodos de manejo de relaciones
     """
     #Metodo para crear una nueva relacion en un proyecto
     def new_relation(self, precedente, siguiente):
-        if len(self.relations) == 0:
+        if len(self.relaciones) == 0:
             numero = 0
         else:
-            numero = self.relations[-1].id + 1
-        self.relations.append(Relation(numero, precedente, siguiente))
+            numero = self.relaciones[-1].id + 1
+        for k in range(len(self.actividades)):
+            if self.actividades[k].id == precedente:
+                pre = k
+            if self.actividades[k].id == siguiente:
+                sig = k
+        self.actividades[sig].fecha_inicio = self.actividades[pre].fecha_inicio + timedelta(days = int(self.actividades[pre].duracion)) 
+        self.relaciones.append(Relation(numero, precedente, siguiente))
         self.update()
 
     #Metodo para visualizar las relaciones
     def view_relations(self):
-        for relation in self.relations:
+        for relation in self.relaciones:
             relation.relation_description()
 
     #Metodo para visualizar las relaciones    
     def relations_list(self):
-        for relation in self.relations:
+        for relation in self.relaciones:
             print(f"ID: {relation.id} Precedente: {relation.precedent} Siguiente: {relation.next}")
 
+    def del_relation2(self, numero):
+        ident = []
+        for k in range (len(self.relaciones)):
+            if self.relaciones[k].preceding == numero or self.relaciones[k].next == numero:
+                ident.append(k)
+        for k in ident:
+            del self.relaciones[k]
+            self.update()
+                
+    
     #Metodo para cargar las relaciones en un proyecto
     #mediante la funcion download()
     def load_relation(self, numero, precedente, siguiente):
-        self.relations.append(Relation(numero, precedente, siguiente))
+        self.relaciones.append(Relation(numero, precedente, siguiente))
 
     
 
@@ -130,29 +254,27 @@ class Project():
     #Este metodo actualiza el archivo JSON correspondiente al
     #proyecto seleccionado reescribiendo toda la informacion 
     def update(self):
-        exportproject = {"nombre" : self.name, 
+        exportproject = {"nombre" : self.nombre, 
                     "id" : self.id, 
-                    "descripcion" : self.description,
-                    "startdate" : self.startdate, 
-                    "endingdate" : self.endingdate, 
+                    "descripcion" : self.descripcion,
+                    "startdate" : self.fecha_inicio, 
                     "actividades" : [], 
                     "relaciones" : [] }
 
-        for activity in self.activitidades:
-            activities = {"nombre" : activity.name, "id" : activity.id, 
-                        "duracion" : activity.duration, 
-                        "fechaini" : activity.early_start, 
-                        "fechafi" : activity.late_start}
+        for activity in self.actividades:
+            activities = {"nombre" : activity.nombre, "id" : activity.id, 
+                        "duracion" : activity.duracion, 
+                        "fechaini" : activity.fecha_inicio}
             exportproject["actividades"].append(activities)
         
-        for relation in self.relations:
+        for relation in self.relaciones:
             relations = {"id" : relation.id,
                         "pre" : relation.preceding, 
                         "sig" : relation.next}   
             exportproject["relaciones"].append(relations)
         
         with open("data/p_"+str(self.id)+".json", "w") as file:
-            json.dump(exportproject, file, indent = 4)
+            json.dump(exportproject, file, indent = 4, default=str)
 
 
 
@@ -161,11 +283,10 @@ Clase de actividades
 """
 class Activity():
     def __init__(self, nombre, numero, duracion, fecha):
-        self.name = nombre
+        self.nombre = nombre
         self.id = numero
-        self.duration = duracion
-        self.early_start = fecha
-        self.late_start = self.early_start
+        self.duracion = duracion
+        self.fecha_inicio = fecha
     """
     Metodos de las actividades
     """
@@ -173,12 +294,12 @@ class Activity():
     def activity_description(self):
         print("\n")
         self.activity_resume()
-        print(f"Inicio: {self.late_start}")
-        print(f"Duracion: {self.duration}")
+        print(f"Inicio: {self.fecha_inicio}")
+        print(f"Duracion: {self.duracion}")
 
     #Metodo que resume el ID y el nombre de la actividad
     def activity_resume(self):
-        print(f"ID: {self.id} Nombre: {self.name}")
+        print(f"ID: {self.id} Nombre: {self.nombre}")
 
 
 """
@@ -197,11 +318,58 @@ class Relation():
 
 
 """
-Clase feriado que no sirve para nada
+Clase feriado 
 """
 class Feriado():
-    def __init__(self):
-        self.fechas = ["0101", "0103", "0105", "1505", "1206", "1508", "2908", "0812", "2512"]
+    
+    def new_feriado(self,feriados,dias,nuevo_feriado):
+        self.dias_no_laborales=[]
+        self.nuevo_feriado=nuevo_feriado
+        if nuevo_feriado in feriados:
+            print("El feriado ya se encuentra actualmente\n")
+        else:    
+            feriados.append(nuevo_feriado)
+            with open("config/"+"feriados.json","w") as file:
+                    dict={'feriados':feriados,'dias_no_laborales':dias}
+                    file.write(json.dumps(dict))
+            print("El feriado se agrego correctamente")        
+
+    def borrar_feriados(self,feriados,dias,borrar_feriado):
+        self.dias_no_laborales=[]
+        self.borrar_feriado=borrar_feriado
+        if borrar_feriado in feriados:
+            feriados.remove(borrar_feriado)
+            print("El feriado fue eliminado correctamente\n")
+            with open("config/"+"feriados.json","w") as file:
+                dict={'feriados':feriados,'dias_no_laborales':dias}
+                file.write(json.dumps(dict))
+        else:
+            print("El feriado no existe\n")   
+
+    def new_no_laboral(self,feriados,dias,nuevo_no_laboral):
+        nuevo_no_laboral = nuevo_no_laboral.upper()
+        self.nuevo_no_laboral=nuevo_no_laboral
+        if nuevo_no_laboral in dias:
+            print("El dia ya se encuentra agregado\n")
+        else:    
+            dias.append(nuevo_no_laboral)
+            with open("config/"+"feriados.json","w") as file:
+                    dict={'feriados':feriados,'dias_no_laborales':dias}
+                    file.write(json.dumps(dict))
+            print("El dia no laboral se agrego correctamente") 
+
+    def borrar_dia_no_laboral(self,feriados,dias,borrar_dia):
+        borrar_dia = borrar_dia.upper()
+        self.borrar_dia=borrar_dia
+        if borrar_dia in dias:
+            dias.remove(borrar_dia)
+            print("El dia no laboral fue eliminado correctamente\n")
+            with open("config/"+"feriados.json","w") as file:
+                dict={'feriados':feriados,'dias_no_laborales':dias}
+                file.write(json.dumps(dict))
+        else:
+            print("El dia no laboral no existe\n")
+
 
 
 
@@ -220,6 +388,14 @@ def seleccionar_fecha(func):
     ttk.Button(top, text="Seleccionar", command = imprimir).pack()
     top.mainloop()
 
+"""
+Funcion para saber si una actividad se encuentra dentro del camino critico
+"""
+def is_critic(ident, camino):
+    if ident in camino:
+        return "y"
+    else:
+        return "n"
 
 
 

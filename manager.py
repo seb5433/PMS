@@ -29,27 +29,17 @@ def strdate(string):
 
 def download(id_def):
     lista_proyectos = []
-    for file in os.listdir ("./data/"):
-        with open(os.path.join (DATA_PATH, file), "r") as file:
-            info = json.load(file)
-            lista_proyectos.append(Project(info["nombre"], info["id"], info["descripcion"], info["startdate"]))
-            lista_proyectos[-1].endingdate = info["endingdate"]
-            actividades = info["actividades"]
-            relaciones = info["relaciones"]
-            for k in actividades:
-                lista_proyectos[-1].load_activity(
-                k["nombre"],
-                k["id"],
-                k["duracion"],
-                k["fechaini"],
-                k["fechafi"]
-                )                   
-            for k in relaciones:
-                lista_proyectos[-1].load_relation(
-                    k["id"], 
-                    k["pre"], 
-                    k["sig"]
-                    )
+    for count in range(0, id_def+1):
+        if os.path.exists("data/p_" + str(count) + ".json"):
+            with open(os.path.join (DATA_PATH, f"p_{count}.json"), "r") as file:
+                info = json.load(file)
+                lista_proyectos.append(Project(info["nombre"], info["id"], info["descripcion"], date.fromisoformat(info["startdate"])))
+                actividades = info["actividades"]
+                relaciones = info["relaciones"]
+                for k in actividades:
+                    lista_proyectos[-1].load_activity(k["nombre"], k["id"], k["duracion"], date.fromisoformat(k["fechaini"]))                   
+                for k in relaciones:
+                    lista_proyectos[-1].load_relation(k["id"], k["pre"], k["sig"])
     return lista_proyectos
 
 

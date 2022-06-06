@@ -11,8 +11,8 @@ class Project():
         self.description = descripcion
         self.startdate = fecha
         self.endingdate = None
-        self.__activities = []
-        self.__relations = []
+        self.activitidades = []
+        self.relations = []
 
     """
     Metodos de manejo de proyectos
@@ -64,31 +64,32 @@ class Project():
     #Metodo para AGREGAR una nueva actividad al objeto 
     #tipo proyecto
     def new_activity(self, nombre, duracion, fecha):
-        if len(self.__activities) == 0:
+        if len(self.activitidades) == 0:
             numero = 0
         else:
-            numero = self.__activities[-1].id + 1
-        self.__activities.append(Activity(nombre, numero, 
+            numero = self.activitidades[-1].id + 1
+        self.activitidades.append(Activity(nombre, numero, 
                                             duracion, fecha))
         self.update()
+        return numero
 
     #Metodo para cargar las actividades desde los JSON
     #desde la funcion dowload()
     def load_activity(self, nombre, numero, duracion, fecha, fechaf):
-        self.__activities.append(Activity(nombre, numero, 
+        self.activitidades.append(Activity(nombre, numero, 
                                             duracion, fecha))
         self.late_start = fechaf
 
     #Metodo para visualizar la descripcion de las actividades
     #de un proyecto
     def view_activities(self):
-        for activity in self.__activities:
+        for activity in self.activitidades:
             activity.activity_description()
     
     #Metodo para visualizar la lista de activiades
     #de un proyecto
     def activities_list(self):
-        for activity in self.__activities:
+        for activity in self.activitidades:
             activity.activity_resume()
 
     """
@@ -96,27 +97,27 @@ class Project():
     """
     #Metodo para crear una nueva relacion en un proyecto
     def new_relation(self, precedente, siguiente):
-        if len(self.__relations) == 0:
+        if len(self.relations) == 0:
             numero = 0
         else:
-            numero = self.__relations[-1].id + 1
-        self.__relations.append(Relation(numero, precedente, siguiente))
+            numero = self.relations[-1].id + 1
+        self.relations.append(Relation(numero, precedente, siguiente))
         self.update()
 
     #Metodo para visualizar las relaciones
     def view_relations(self):
-        for relation in self.__relations:
+        for relation in self.relations:
             relation.relation_description()
 
     #Metodo para visualizar las relaciones    
     def relations_list(self):
-        for relation in self.__relations:
+        for relation in self.relations:
             print(f"ID: {relation.id} Precedente: {relation.precedent} Siguiente: {relation.next}")
 
     #Metodo para cargar las relaciones en un proyecto
     #mediante la funcion download()
     def load_relation(self, numero, precedente, siguiente):
-        self.__relations.append(Relation(numero, precedente, siguiente))
+        self.relations.append(Relation(numero, precedente, siguiente))
 
     
 
@@ -137,14 +138,14 @@ class Project():
                     "actividades" : [], 
                     "relaciones" : [] }
 
-        for activity in self.__activities:
+        for activity in self.activitidades:
             activities = {"nombre" : activity.name, "id" : activity.id, 
                         "duracion" : activity.duration, 
                         "fechaini" : activity.early_start, 
                         "fechafi" : activity.late_start}
             exportproject["actividades"].append(activities)
         
-        for relation in self.__relations:
+        for relation in self.relations:
             relations = {"id" : relation.id,
                         "pre" : relation.preceding, 
                         "sig" : relation.next}   

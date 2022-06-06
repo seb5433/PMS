@@ -1,13 +1,13 @@
 {
     "color": {
-      "window_bg_color": ["gray98", "#1C2128"],
+      "window_bg_color": ["#22272E", "#22272E"],
       "button": ["#30363d", "#30363d"],
       "button_hover": ["#A4BDE6", "#A4BDE6"],
       "button_border": ["#8b949e", "#8b949e"],
       "hover_color" : ["white", "white"],
       "checkbox_border": ["gray40", "gray60"],
       "checkmark": ["white", "gray90"],
-      "entry": ["gray24", "gray24"],
+      "entry": ["#1C2128", "#1C2128"],
       "entry_border": ["gray70", "#768390"],
       "entry_placeholder_text": ["gray52", "gray62"],
       "frame_border": ["#A7C2E0", "#5FB4DD"],

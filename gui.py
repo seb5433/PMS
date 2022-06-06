@@ -1,9 +1,12 @@
 # GUI del administrador de proyectos
 
 import json
+from platform import release
 from tkinter import *
 import tkinter
-from tkinter.ttk import Treeview
+from tkinter.ttk import Style, Treeview
+from turtle import bgcolor, width
+from backend.backend import Project
 from customtkinter.widgets.ctk_canvas import CTkCanvas
 from customtkinter.windows.ctk_tk import CTk
 from tkcalendar import *
@@ -25,6 +28,7 @@ class Parametros ():
         self.COLOR_PRIMARIO = "#22272E"
         self.COLOR_FG = "#768390"
         self.COLOR_LINEAS = "#316DCA"
+        self.COLOR_SELECCION = "#264779"
         self.PATH = self.resource_path()
         self.PATH_IMAGE = os.path.join (self.PATH,'images')
         self.PATH_CONFIG = os.path.join (self.PATH,'config')
@@ -61,8 +65,7 @@ class App(Parametros):
 
     def __init__(self, master, parent, project):
         super().__init__()
-        for x in project["actividades"]:
-            print (x["fechaini"])
+        self.project = project
         self.PARTENT = parent
         self.MASTER = master
         self.MASTER.grid_columnconfigure(1, weight=1)
@@ -77,6 +80,8 @@ class App(Parametros):
         self.frame_right_activity.grid(row=0, column=1, sticky="nswe", padx=20, pady=20)
         self.frame_right_calendar = ctk.CTkFrame(master=self.MASTER)
         self.frame_right_calendar.grid(row=0, column=1, sticky="nswe", padx=20, pady=20)
+
+        self.frame_right_activity.grid_rowconfigure(1, minsize=10)   # empty row with minsize as spacing
 
         # ============ frame_left ============
 
@@ -116,6 +121,7 @@ class App(Parametros):
 
         cal = Calendar(self.frame_right_calendar, font="Cascade 13", selectmode='day', locale='es_ES', mindate=mindate, maxdate=maxdate, disabledforeground='red', cursor="hand2", year=2022, month=5, day=20)
         cal.pack(fill="both", expand=True)
+        self.activity()
 
         self.MASTER.mainloop()
 
@@ -125,7 +131,6 @@ class App(Parametros):
     
     def open_actividades (self):
         self.frame_right_activity.tkraise()
-        self.activity()
 
     def open_calendario (self):
         self.frame_right_calendar.tkraise()
@@ -133,27 +138,115 @@ class App(Parametros):
     def ir_a_inicio (self):
         self.PARTENT.frame_portada.tkraise()
 
+    def fixed_map(self, option):
+        return [elm for elm in self.style.map('Treeview', query_opt=option) if 
+        elm[:2] != ('!disabled', '!selected')]
+
+ 
     def activity (self):
+        """## Funcion que crea la pestaña de actividades"""
+        
+        # Creacion del estilo para la treeview
+        self.style = Style ()
+        self.style.theme_use ("vista")
+        self.style.map('Treeview', foreground= self.fixed_map('foreground'), background= [('selected', self.COLOR_SELECCION)], filedbackground = self.fixed_map('filedbackground'))
+        self.style.configure("Treeview", background = self.COLOR_PRIMARIO, filedbackground = "black", highlightthickness=0, bd=0, font=('Segoe UI', 11)) # Modify the font of the body
+        self.style.configure("Treeview.Heading", font=('Segoe UI', 13,'bold'), background = "#1C2128",  bd=0) # Modify the font of the headings
+        self.style.layout("Treeview", [('Treeview.treearea', {'sticky': 'nswe'})]) # Remove the borders
+        
+
         columns = ("Actividad", "Duracion")
-        self.activity_tree =  Treeview(self.frame_right_activity,columns = columns)
-        self.activity_tree.pack (expand=True)
-
-        self.activity_tree.heading ("Actividad", text= "Actividad")
-        self.activity_tree.heading ("Duracion", text= "Duracion")
-
-        # generate sample data
-        contacts = []
-        for n in range(1, 100):
-            contacts.append((f'first {n}', f'last {n}', f'email{n}@example.com'))
-
-        # add data to the treeview
-        x = 0
-        for contact in contacts:
-            self.activity_tree.insert('', END, iid= f"{x}", values=contact)
-            x += 1
+        self.activity_tree =  Treeview(self.frame_right_activity,columns = columns, style="Treeview",height=20)
+        self.activity_tree.pack (side = TOP, pady = 5, fill = "x")
 
         
-        self.activity_tree.insert ("1",END, values= ["Que onda", "Perron"])
+        self.activity_tree.tag_configure("odd", background = self.COLOR_FONDO, foreground= "#E7F3F3")
+        self.activity_tree.tag_configure("even", background = self.COLOR_PRIMARIO, foreground= "#E7F3F3")
+
+        self.activity_tree.heading ("#0", )
+        self.activity_tree.heading ("Actividad", text= "Actividad")
+        self.activity_tree.heading ("Duracion", text= "Duración")
+
+        self.activity_tree.column ("Actividad", minwidth=500, width = 500)
+        self.activity_tree.column ("Duracion", minwidth=250, width = 350)
+
+        self.activity_tree.bind ("<Button-3>",self.click_izq)
+        self.activity_tree.bind ("<Escape>",self.deselect_all)
+
+        self.cargar_actividades()
+
+    def cargar_actividades (self):
+        # add data to the treeview
+        for x in self.activity_tree.get_children():
+            self.activity_tree.delete(x)
+
+        x = 0
+        space = 0
+        for element in self.project.activitidades:
+            parent = ''
+            for relacion in self.project.relations:
+                if element.id == relacion.next:
+                    parent = relacion.preceding
+                    space += 1
+
+            tupla = (element.name, element.duration)
+            
+            if (x % 2 == 0):
+                self.activity_tree.insert(parent, END, iid= f"{x}", values = tupla, tags= "odd")
+            else:
+                self.activity_tree.insert(parent, END, iid= f"{x}", values = tupla, tags= "even")
+            x += 1
+
+        self.activity_tree.column ("#0", minwidth=10, width = 20*space, stretch = True)
+
+    def click_izq (self, event):
+        font = ('Segoe UI', 13,)
+        menu = Menu (self.frame_right_activity, tearoff= 0, title= "Manejo de actividades", relief= "flat")
+        menu.add_command (label= "Nueva actividad", font = font, command = self.open_crear_actividad)
+        menu.add_command (label= "Eliminar actividad", font = font, )
+        menu.post(event.x_root, event.y_root)
+
+    def deselect_all (self, event):
+        if len(self.activity_tree.selection()) > 0:
+            self.activity_tree.selection_remove(self.activity_tree.selection()[0])
+
+    def open_crear_actividad (self):
+        self.frame_crear_actividad = ctk.CTkToplevel (bg = "#292E36")
+        self.frame_crear_actividad.focus_force()
+        self.frame_crear_actividad.wm_overrideredirect(True)
+        self.frame_crear_actividad.resizable(0, 0)
+        ancho = 400
+        alto = 120
+        width = 250
+        self.frame_crear_actividad.geometry (f"{ancho}x{alto}")
+        ctk.CTkLabel (self.frame_crear_actividad, text= "Crear actividad", text_font= ("Segoe UI", 15)).pack (side = TOP)
+        frame_entries = ctk.CTkFrame (self.frame_crear_actividad, bg_color = "#292E36", fg_color= "#292E36")
+        frame_entries.pack (side = TOP)
+        self.nombre = ctk.CTkEntry (frame_entries, placeholder_text = "Nombre", width= width)
+        self.nombre.bind ("<Return>", self.key_enter_activity)
+        self.nombre.focus_set()
+        self.nombre.pack (side = LEFT, pady = 10, padx = 10)
+        self.duracion = ctk.CTkEntry (frame_entries, placeholder_text = "Duración", width= 120)
+        self.duracion.bind ("<Return>", self.key_enter_activity)
+        self.duracion.pack (side = LEFT, pady = 10, padx = 10)
+        ctk.CTkButton (self.frame_crear_actividad, text = "Listo", fg_color = "#238636", cursor = "hand2", command = self.crear_actividad).pack (side = TOP, fill = "x", padx = 10)
+        self.center(self.frame_crear_actividad)
+
+    def key_enter_activity(self, event):
+        self.crear_actividad()
+    
+    def crear_actividad (self):
+        children = self.activity_tree.selection()
+        
+        id = self.project.new_activity (self.nombre.get(), self.duracion.get(), "2022-12-12")
+        self.activity_tree.insert ("",END, values= (self.nombre.get(), self.duracion.get()), tags= "even")
+        self.frame_crear_actividad.destroy()
+        self.project.update()
+        if len(children) > 0:
+            self.project.new_relation (int(children[0]), id)
+        self.cargar_actividades()
+        pass
+
 
     def change_mode(self):
         if self.switch_2.get() == 1:
@@ -281,16 +374,18 @@ class Portada (Parametros):
     def data_manage (self):
         self.data = []
         self.IDES = []
+        x = 0
         if self.LISTA_PROYECTOS:
             for proyecto in self.LISTA_PROYECTOS:
                 self.data.append ([proyecto.name, proyecto.description, proyecto.startdate, "0%"])
-                self.IDES.append (proyecto.id)
+                self.IDES.append (x)
+                x+=1
         
         
 
     def desplegar_tabla (self):
         
-        self.tabla_proyectos = sheet.Sheet(self.frame_down,headers= ['Proyecto', 'Descripción', 'Inicio', 'Avance'],data= self.data,
+        self.tabla_proyectos = sheet.Sheet(self.frame_down,headers = ['Proyecto', 'Descripción', 'Inicio', 'Avance'],data= self.data,
         show_table = True,
         show_top_left = False,
         show_row_index = False,
@@ -406,7 +501,7 @@ class Portada (Parametros):
     def selected (self, binded):
         self.row = self.tabla_proyectos.identify_row(binded)
         self.tabla_proyectos.dehighlight_all()
-        self.tabla_proyectos.highlight_rows(rows = [self.row], bg = "#264779", fg = "Black", highlight_index = True, redraw = True)
+        self.tabla_proyectos.highlight_rows(rows = [self.row], bg = self.COLOR_SELECCION, fg = "Black", highlight_index = True, redraw = True)
 
 
     def buscador(self):
@@ -426,7 +521,7 @@ class Portada (Parametros):
 
         # CREACION DEL ENTRY
 
-        self.entry_buscador = ctk.CTkEntry(master=self.frame_buscador_child,text_font=("Cascade", 12),placeholder_text="Buscar proyecto...",width=500,height=40,fg_color=self.COLOR_FONDO, text_color= "#768390")
+        self.entry_buscador = ctk.CTkEntry(master=self.frame_buscador_child,text_font=("Cascade", 12),placeholder_text="Buscar proyecto...",width=500,height=40, text_color= "#768390")
         self.entry_buscador.pack(padx=20)
 
 
@@ -444,13 +539,9 @@ class Portada (Parametros):
         self.btn_eliminar.grid(row=0, column=2,padx=13)
 
     def abrir (self):
-        project = self.tabla_proyectos.get_sheet_data(get_index = True)[self.row]
-        project_dict = {}
-        with open (os.path.join(self.PATH_DATA, f"p_{project[0]}.json"), "r") as FILE:
-            project_dict = json.loads (FILE.read())
-            
+        project = self.LISTA_PROYECTOS[self.row]
         self.frame_calendario.tkraise()
-        App (self.frame_calendario, self, project_dict)
+        App (self.frame_calendario, self, project)
 
     def nuevo_proyecto (self):
         WindowProject()

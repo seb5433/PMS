@@ -2,6 +2,7 @@
 import json
 from tkinter import *
 from tkinter.ttk import Style, Treeview
+from wsgiref.validate import validator
 from backend.backend import Project
 from tkcalendar import *
 import tksheet as sheet
@@ -340,33 +341,43 @@ class App(Parametros):
 
     def open_crear_actividad (self, titulo, callback):
         self.frame_crear_actividad = ctk.CTkToplevel (bg = "#292E36")
-        self.frame_crear_actividad.focus_force()
         self.frame_crear_actividad.wm_overrideredirect(True)
         self.frame_crear_actividad.resizable(0, 0)
         ancho = 400
-        alto = 120
+        alto = 130
         width = 250
         self.frame_crear_actividad.geometry (f"{ancho}x{alto}")
-        ctk.CTkLabel (self.frame_crear_actividad, text= titulo, text_font= ("Segoe UI", 15)).pack (side = TOP)
+        ctk.CTkLabel (self.frame_crear_actividad, text= titulo, text_font= ("Segoe UI", 15), fg_color= "#292E36").pack (side = TOP)
         frame_entries = ctk.CTkFrame (self.frame_crear_actividad, bg_color = "#292E36", fg_color= "#292E36")
         frame_entries.pack (side = TOP)
+        
+        nombre_holder = "Nombre"
+        duracion_holder = "Duración"
+        if ("Editar" in titulo):
+            nombre_holder = None
+            duracion_holder = None
         self.var_nombre = StringVar()
-        self.nombre = ctk.CTkEntry (frame_entries,textvariable = self.var_nombre, placeholder_text = "Nombre", width= width)
+        self.nombre = ctk.CTkEntry (frame_entries,textvariable = self.var_nombre, placeholder_text = nombre_holder, width= width)
         self.nombre.bind ("<Return>", callback)
+        self.nombre.focus()
         self.nombre.focus_set()
-        self.nombre.pack (side = LEFT, pady = 10, padx = 10)
+        self.nombre.focus_force()
+        self.nombre.pack (side = LEFT, pady = 5, padx = 10)
         self.var_duracion = StringVar()
-        self.duracion = ctk.CTkEntry (frame_entries, textvariable = self.var_duracion, placeholder_text = "Duración", width= 120)
+        self.duracion = ctk.CTkEntry (frame_entries, textvariable = self.var_duracion, placeholder_text = duracion_holder, width= 120)
         self.duracion.bind ("<Return>", callback)
-        self.duracion.pack (side = LEFT, pady = 10, padx = 10)
-        ctk.CTkButton (self.frame_crear_actividad, text = "Listo", fg_color = "#238636", cursor = "hand2", command = callback).pack (side = TOP, fill = "x", padx = 10)
+        self.duracion.pack (side = LEFT, pady = 5, padx = 10)
+        ctk.CTkButton (self.frame_crear_actividad, text = "Listo", fg_color = "#238636", cursor = "hand2", command = callback).pack (side = BOTTOM, fill = "x", padx = 10)
+        self.aviso = StringVar()
+        self.label_aviso = ctk.CTkLabel (self.frame_crear_actividad, text_font= ("Segoe UI", 12),textvariable = self.aviso, fg_color= "#292E36", text_color = "#DA3633")
+        self.label_aviso.pack (side = BOTTOM, fill = "x", padx = 10, pady = 5)
+
         self.center(self.frame_crear_actividad)
 
         if ("Editar" in titulo):
             id = self.activity_tree.selection()[0]
             element = self.activity_tree.item(id)
-            print ("Edicion")
-            #self.nombre.config (text = element["values"][0])
+            #self.nombre.configure (text = element["values"][0])
             self.var_nombre.set (element["values"][0])
             #self.duracion.config (text = element["values"][1])
             self.var_duracion.set (element["values"][1])
@@ -374,6 +385,11 @@ class App(Parametros):
     def crear_actividad (self, event = None):
         children = self.activity_tree.selection()
         
+        aviso = self.validar_datos()
+        if aviso:
+            self.aviso.set (aviso)
+            return
+
         id = self.project.new_activity (self.nombre.get(), self.duracion.get(), self.project.fecha_inicio)
         self.activity_tree.insert ("",END, values= (self.nombre.get(), int(self.duracion.get())), tags= "even")
         self.frame_crear_actividad.destroy()
@@ -381,11 +397,29 @@ class App(Parametros):
         if len(children) > 0:
             self.project.new_relation (int(children[0]), id)
         self.cargar_actividades()
-        pass
+
+    def validar_datos (self):
+        """## Funcion que valida la entrada del usuario"""
+        nombre = self.nombre.get()
+        duracion = self.duracion.get()
+        if (nombre == "" or duracion == ""):
+            return "Complete todos los campos"
+        try:
+            duracion = int(duracion)
+        except ValueError:
+            return "Ingrese un numero en el campo duración"
+        
+        if (duracion < 1 or duracion > 99):
+            return "Duración fuera de rango"
 
     def editar_actividad (self, event):
         children = self.activity_tree.selection()
-        print ("Cargando actividades")
+
+        aviso = self.validar_datos()
+        if aviso:
+            self.aviso.set (aviso)
+            return
+
         children = int(children[0])
         object = 0
         for x in self.project.actividades:

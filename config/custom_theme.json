@@ -13,7 +13,7 @@
       "frame_border": ["#A7C2E0", "#5FB4DD"],
       "frame_low": ["#22272E", "#22272E"],
       "frame_high": ["#22272E", "gray20"],
-      "label": ["#30363d", "#30363d"],
+      "label": ["#22272E", "#22272E"],
       "text": ["#FFFFFF", "#FFFFFF"],
       "text_disabled": ["gray60", "22272E"],
       "text_button_disabled": ["22272E", "22272E"],

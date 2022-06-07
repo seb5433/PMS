@@ -66,7 +66,9 @@ class App(Parametros):
         self.MASTER.grid_columnconfigure(1, weight=1)
         self.MASTER.grid_rowconfigure(0, weight=1)
 
-        self.frame_left = ctk.CTkFrame(master=self.MASTER, width=180, corner_radius=0)
+        self.frame_left = ctk.CTkFrame(master=self.MASTER,
+                                                 width=180,
+                                                 corner_radius=0)
         self.frame_left.grid(row=0, column=0, sticky="nswe")
 
         self.frame_right_activity = ctk.CTkFrame(master=self.MASTER)
@@ -74,7 +76,7 @@ class App(Parametros):
         self.frame_right_calendar = ctk.CTkFrame(master=self.MASTER)
         self.frame_right_calendar.grid(row=0, column=1, sticky="nswe", padx=20, pady=20)
 
-        self.frame_right_activity.grid_rowconfigure(10, weight=1)   # empty row with minsize as spacing
+        self.frame_right_activity.grid_rowconfigure(1, minsize=10)   # empty row with minsize as spacing
 
         # ============ frame_left ============
 
@@ -105,6 +107,8 @@ class App(Parametros):
 
         self.logo.grid(row=9, column=0, pady=10, padx=10)
 
+        self.frame_right_calendar.rowconfigure(0, weight=1)
+        self.frame_right_calendar.grid_columnconfigure(0, weight=1)
 
         today = datetime.date.today()
         self.mindate = datetime.date(year=2018, month=1, day=21)
@@ -142,14 +146,19 @@ class App(Parametros):
 
     #display label con datos de la actividad en la fecha seleccionada
     def cal_event(self, event):
+        self.frame_actividades = ctk.CTkFrame(master=self.frame_right_calendar, width=500, height=90, fg_color="gray10")
+        self.frame_actividades.grid(row=1, column=0, sticky="nswe")
         self.date_calendar = (event.widget.selection_get())
         n = self.cantidad_actividades(self.date_calendar)
+        self.frame_actividades.grid_rowconfigure(n, weight=1)
+        self.frame_actividades.grid_columnconfigure(0, weight=1)
+        self.frame_actividades.grid_propagate(False)
         if n > 0:   
             for i in range(n):
                 self.actividades(self.date_calendar, i)
                 self.event_name=ctk.CTkLabel(master=self.frame_actividades, corner_radius=5, fg_color=("gray18"), text= self.nombres[i], text_font=("Cascade", 12), text_color="white") 
                 self.event_name.grid(row=i, column=0, sticky="nswe", pady=5, padx=5)
-                self.event_duration=ctk.CTkLabel(master=self.frame_actividades, corner_radius=5, fg_color=("white"), text="Duración: " + self.duration[i] + " dias", text_font=("Cascade", 12), text_color="gray18")
+                self.event_duration=ctk.CTkLabel(master=self.frame_actividades, corner_radius=5, fg_color=("white"), text="Duración: " + self.duration[i], text_font=("Cascade", 12), text_color="gray18")
                 self.event_duration.grid(row=i, column=1, sticky="nswe", pady=5, padx=5)
         
         else:
@@ -188,13 +197,11 @@ class App(Parametros):
                 cursor="hand2", year=2022, month=5, day=20, date_pattern='y-mm-dd', fg_color=self.COLOR_LINEAS,background="gray18", disabledbackground="gray18", bordercolor="black", 
                 headersbackground="gray10", normalbackground="gray18", foreground='white', 
                 normalforeground='white', headersforeground='white',weekendbackground="gray30", weekendforeground='white', disabledforeground='white',)
-        self.cal.pack (side = TOP, fill = "both", expand = True)
-        #self.cal.rowconfigure(0, weight=10)
-        #self.cal.columnconfigure(0, weight=1)
+        self.cal.grid(row=0, column=0, sticky="nswe", padx=10, pady=10)
+        self.cal.rowconfigure(0, weight=1)
+        self.cal.columnconfigure(0, weight=1)
         #click izquierdo para mostrar actividades
         self.cal.bind("<<CalendarSelected>>", self.cal_event)
-        self.frame_actividades = ctk.CTkFrame(master=self.frame_right_calendar, fg_color="gray10")
-        self.frame_actividades.pack(side = BOTTOM, fill = "x")
 
         self.fechas= []
         for i in self.project.actividades:
@@ -214,7 +221,7 @@ class App(Parametros):
                 self.date = datetime.datetime.strptime(i, '%d/%m').date()
                 self.date = self.date.replace(year=self.year)
                 self.cal.calevent_create(self.date, tags=i, text=i)
-                self.cal.tag_config(i, background='red', foreground='yellow')
+                self.cal.tag_config(i, background='#da5b0b', foreground='#FFFFFF')
 
 
     def generar_reporte (self):

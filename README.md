@@ -20,7 +20,7 @@
 - [ ] Hacer informe
 
 ------
-### Itegrantes
+### Integrantes
 - 5176882 - Jose Sebastian Vera
 - 5425495 - Esteban Gabriel Fernandez Arrua
 - 5611153 - Ilson Matías González Estigarribia

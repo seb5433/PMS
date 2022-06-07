@@ -201,9 +201,6 @@ class App(Parametros):
                 othermonthbackground = "#5D6466",
                 othermonthforeground = "#FFFFFF",
                 cursor="hand2",
-                year=2022,
-                month=5,
-                day=20,
                 date_pattern='y-mm-dd',
                 fg_color=self.COLOR_LINEAS,
                 background = self.COLOR_PRIMARIO,
@@ -224,18 +221,11 @@ class App(Parametros):
         #click izquierdo para mostrar actividades
         self.cal.bind("<<CalendarSelected>>", self.cal_event)
 
-        self.fechas= []
-        for i in self.project.actividades:
-            self.fechas.append(str(i.fecha_inicio))
-        
-        for i in range (len(self.fechas)):
-            self.date = datetime.datetime.strptime(self.fechas[i], '%Y-%m-%d').date()
-            self.cal.calevent_create(self.date, text=self.fechas[i], tags = "activity")
-            self.cal.tag_config("activity", background='#2ea043', foreground='#FFFFFF')
         
         self.mindate_int = self.mindate.strftime('%Y')
         self.maxdate_int = self.maxdate.strftime('%Y')
         self.years = int(self.maxdate_int) - int(self.mindate_int) 
+        self.insertar_actividades()
         
         for i in self.feriados['feriados']:
             for j in range (self.years):
@@ -245,6 +235,15 @@ class App(Parametros):
                 self.cal.calevent_create(self.date, tags=i, text=i)
                 self.cal.tag_config(i, background='#da5b0b', foreground='#FFFFFF')
 
+    def insertar_actividades (self):
+        self.fechas= []
+        for i in self.project.actividades:
+            self.fechas.append(str(i.fecha_inicio))
+        
+        for i in range (len(self.fechas)):
+            self.date = datetime.datetime.strptime(self.fechas[i], '%Y-%m-%d').date()
+            self.cal.calevent_create(self.date, text=self.fechas[i], tags = "activity")
+            self.cal.tag_config("activity", background='#2ea043', foreground='#FFFFFF')
 
     def generar_reporte (self):
         self.project.generarReporte()
@@ -256,6 +255,7 @@ class App(Parametros):
         self.frame_right_activity.tkraise()
 
     def open_calendario (self):
+        self.insertar_actividades()
         self.frame_right_calendar.tkraise()
     
     def ir_a_inicio (self):

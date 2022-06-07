@@ -6,15 +6,15 @@
 ### TODO
 
 - [ ] Ocultar Critical PATH
-- [ ] Evitar dias feriados y no laborales
-- [ ] Actualiza calendario cuando se crean nuevas actividades
+- [X] Evitar dias feriados y no laborales
+- [X] Actualiza calendario cuando se crean nuevas actividades
 - [ ] Eliminar actividades
 - [ ] Traba para calcular caminos críticos
 - [X] Mensaje de error para crear actividades
 - [ ] Terminar los reportes
 - [ ] Comentar todo el Código
 - [ ] Buscador de proyecto
-- [ ] Limites
+- [X] Limites
 - [ ] Editar la fecha de la pestaña nuevo 
 - [ ] Error del matplotlib
 - [ ] Hacer informe

@@ -2,18 +2,19 @@ import json
 import tkinter as tk
 from tkinter import ttk
 
+
 from .date_entry import *
 import os
 from datetime import timedelta
 
 #Librerias para el camino criticoy diagrama de Gantt
 from .caminocritico import Node
-import locale
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 from matplotlib.patches import Patch
+from .reporte import *
+from PIL import Image
 
 
 
@@ -196,8 +197,43 @@ class Project():
         leyend_dict = {"Camino critico" : "red", "Actividad no critica" : "blue"}
         leyenda = [Patch(facecolor=leyend_dict[i], label=i)  for i in leyend_dict]
         plt.legend(handles=leyenda)
-        plt.savefig('images/gant.png')
+
+        """plt.savefig('images/gant.png')
+        Image.open('images/gant.png').save('images/gant.jpg','JPEG')"""
+
+        plt.plot([1, 2])
+        plt.savefig('images/gant.jpg')
+        """im = Image.open("images/gant.jpg")
+        newsize = (450, 300)
+        im = im.resize(newsize)
+        im.save("images/gant.jpg")"""
+
         #plt.show()
+
+    def generarReporte(self):
+        self.diagrama()
+        
+        datos = []
+        
+        for activity in self.actividades:
+            lista = {"NOMBRE" : activity.nombre, 
+                        "DURACION" : str(activity.duracion), 
+                        "FECHA DE INICIO" : str(activity.fecha_inicio),
+                        "FECHA DE FINALIZACION": str(activity.fecha_inicio + timedelta(days= int(activity.duracion)))}
+            datos.append(lista)
+            
+
+        titulo = f"Proyecto: {self.nombre}"
+        
+        cabecera = (("NOMBRE", "NOMBRE"),
+            ("DURACION", "DURACION"),
+            ("FECHA DE INICIO", "FECHA DE INICIO"),
+            ("FECHA DE FINALIZACION", "FECHA DE FINALIZACION"))
+
+        nombrePDF = "Reporte.pdf"
+
+        reporte = reportePDF(titulo, cabecera, datos, nombrePDF).Exportar()
+        print(reporte)
 
     """
     Metodos de manejo de relaciones

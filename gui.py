@@ -246,7 +246,7 @@ class App(Parametros):
 
 
     def generar_reporte (self):
-        self.project.diagrama()
+        self.project.generarReporte()
 
     def button_event(self):
         pass
@@ -371,7 +371,7 @@ class App(Parametros):
             #self.duracion.config (text = element["values"][1])
             self.var_duracion.set (element["values"][1])
     
-    def crear_actividad (self, event):
+    def crear_actividad (self, event = None):
         children = self.activity_tree.selection()
         
         id = self.project.new_activity (self.nombre.get(), self.duracion.get(), self.project.fecha_inicio)

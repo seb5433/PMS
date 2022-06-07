@@ -13,6 +13,6 @@
 - [X] Mensaje de error para crear actividades
 - [ ] Terminar los reportes
 - [ ] Comentar todo el Código
-- [ ] Limites
+- [X] Limites
 - [X] Editar la fecha de la pestaña nuevo 
 - [ ] Hacer informe

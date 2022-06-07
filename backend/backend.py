@@ -8,8 +8,8 @@ import os
 from datetime import timedelta
 
 #Librerias para el camino criticoy diagrama de Gantt
-from .caminocritico import Node
 import numpy as np
+from .caminocritico import Node
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
@@ -164,8 +164,7 @@ class Project():
         
         nrow = len(csv)
         
-        plt.figure(num = 1, figsize = (10, 6), 
-                   dpi = 100)
+        plt.figure(num = 1, figsize = (10, 6), dpi = 100)
         bar_width = 0.9
         
         for i in range (nrow):
@@ -249,7 +248,18 @@ class Project():
                 pre = k
             if self.actividades[k].id == siguiente:
                 sig = k
-        self.actividades[sig].fecha_inicio = self.actividades[pre].fecha_inicio + timedelta(days = int(self.actividades[pre].duracion)) 
+
+        with open ("config/feriados.json", "r") as FILE:
+            feriados = json.loads(FILE.read())
+
+        day = self.actividades[pre].fecha_inicio + timedelta(days = int(self.actividades[pre].duracion))
+        no_laborales = []
+        for x in range (len(feriados["feriados"])):
+            no_laborales.append (f"{int(feriados['feriados'][x].split('/')[0])}/{int(feriados['feriados'][x].split('/')[1])}")
+
+        while (self.calular_dia(day.year, day.month, day.day) in feriados["dias_no_laborales"] or f"{day.day}/{day.month}" in no_laborales):
+            day = day + timedelta(days = 1)
+        self.actividades[sig].fecha_inicio = day
         self.relaciones.append(Relation(numero, precedente, siguiente))
         self.update()
 
@@ -311,7 +321,64 @@ class Project():
         with open("data/p_"+str(self.id)+".json", "w") as file:
             json.dump(exportproject, file, indent = 4, default=str)
 
+    def calular_dia (self, year, month, date):
+        month_kode = [1,4,4,0,2,5,0,3,6,1,4,6]
+        year_kode = [0,6,4,2,0,6]
+        day_kode = [0,1,2,3,4,5,6]
+        a1 = 0
+        a2 = 0
+        a3 = 0
+        a4 = 0
+        a5 = 0
 
+        year2 = year
+
+        a1 = date
+        month = month - 1
+        month = month_kode[month]
+        a2 = month
+
+
+        if year>=1500 and year<=1599:
+            year2 = year_kode[0]
+
+        if year>=1600 and year<=1699:
+            year2 = year_kode[1]
+
+        if year>=1700 and year<=1799:
+            year2 = year_kode[2]
+
+        if year>=1800 and year<=1899:
+            year2 = year_kode[3]
+
+        if year>=1900 and year<=1999:
+            year2 = year_kode[4]
+
+        if year>=2000 and year<=2099:
+            year2 = year_kode[5]
+
+        a3 = year2
+        a4 = year % 100
+        a5 = a4 / 4
+        a5 = int(a5)
+        a6 = a1 + a2 + a3 + a4 + a5
+        a7 = a6 % 7
+        a8 = 0
+        a8 = day_kode[a7]
+        if a8 == 0:
+            return "SABADO"
+        if a8 == 1:
+            return "DOMINGO"
+        if a8 == 2:
+            return "LUNES"
+        if a8 == 3:
+            return "MARTES"
+        if a8 == 4:
+            return "MIERCOLES"
+        if a8 == 5:
+            return "JUEVES"
+        if a8 == 6:
+            return "VIERNES"
 
 """
 Clase de actividades

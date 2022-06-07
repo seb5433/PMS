@@ -16,4 +16,5 @@
 - [ ] Buscador de proyecto
 - [ ] Limites
 - [ ] Editar la fecha de la pestaña nuevo 
+- [ ] Error del matplotlib
 - [ ] Hacer informe

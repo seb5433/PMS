@@ -177,10 +177,10 @@ class Project():
         plt.yticks(y_pos, labels= reversed(csv["name"]))
         
         #Poner en formato MES-dias
-        locale.setlocale(locale.LC_TIME, 'es_ES')
+        """locale.setlocale(locale.LC_TIME, 'es_ES')
         plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter(fmt= "%b-%y"))
-        plt.gca().xaxis.set_minor_locator(mdates.WeekdayLocator(byweekday=0))
+        plt.gca().xaxis.set_minor_locator(mdates.WeekdayLocator(byweekday=0))"""
         
         
         plt.grid(axis="x", which="major", lw=1)
@@ -196,9 +196,8 @@ class Project():
         leyend_dict = {"Camino critico" : "red", "Actividad no critica" : "blue"}
         leyenda = [Patch(facecolor=leyend_dict[i], label=i)  for i in leyend_dict]
         plt.legend(handles=leyenda)
- 
-        plt.show()
-
+        plt.savefig('images/gant.png')
+        #plt.show()
 
     """
     Metodos de manejo de relaciones

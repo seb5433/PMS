@@ -419,35 +419,6 @@ class Node(object):
             drag=str(self.drag).ljust(w-5),
         ))
 
-    # def is_acyclic1(self):
-        # """
-        # Returns true if the network has no cycle anywhere within it
-        # by performing a depth-first search of all nodes.
-        # Returns false otherwise.
-        # A proper task network should be acyclic, having an explicit
-        # "start" and "end" node with no link back from end to start.
-        # """
-        # q = [(_, set([_])) for _ in self.nodes]
-        # i = 0
-        # while q:
-            # node, priors = q.pop(0)
-            # # i += 1
-            # # sys.stdout.write('\ri: %i' % i)
-            # # sys.stdout.flush()
-            # for next_node in node.to_nodes:
-                # if next_node in priors:
-                    # print("Next node already in prior nodes:")
-                    # print(next_node.name)
-                    # print("Priors:")
-                    # for prior in sorted(priors, key=lambda n: n.name):
-                        # print(prior.name)
-
-                    # return False
-                # next_priors = priors.copy()
-                # next_priors.add(next_node)
-                # q.append((next_node, next_priors))
-        # return True
-
     def is_acyclic(self):
         g = dict((node.name, tuple(child.name for child in node.to_nodes))for node in self.nodes)
         return not cyclic(g)

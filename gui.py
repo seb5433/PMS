@@ -66,9 +66,7 @@ class App(Parametros):
         self.MASTER.grid_columnconfigure(1, weight=1)
         self.MASTER.grid_rowconfigure(0, weight=1)
 
-        self.frame_left = ctk.CTkFrame(master=self.MASTER,
-                                                 width=180,
-                                                 corner_radius=0)
+        self.frame_left = ctk.CTkFrame(master=self.MASTER, width=180, corner_radius=0)
         self.frame_left.grid(row=0, column=0, sticky="nswe")
 
         self.frame_right_activity = ctk.CTkFrame(master=self.MASTER)
@@ -76,7 +74,7 @@ class App(Parametros):
         self.frame_right_calendar = ctk.CTkFrame(master=self.MASTER)
         self.frame_right_calendar.grid(row=0, column=1, sticky="nswe", padx=20, pady=20)
 
-        self.frame_right_activity.grid_rowconfigure(1, minsize=10)   # empty row with minsize as spacing
+        self.frame_right_activity.grid_rowconfigure(10, weight=1)   # empty row with minsize as spacing
 
         # ============ frame_left ============
 
@@ -95,7 +93,7 @@ class App(Parametros):
         self.button_2 = ctk.CTkButton(master=self.frame_left, text="Actividades", command=self.open_actividades)
         self.button_2.grid(row=3, column=0, pady=10, padx=20)
 
-        self.button_3 = ctk.CTkButton(master=self.frame_left, text="Reporte", command=self.button_event)
+        self.button_3 = ctk.CTkButton(master=self.frame_left, text="Reporte", command=self.generar_reporte)
         self.button_3.grid(row=4, column=0, pady=10, padx=20)
 
         self.button_4 = ctk.CTkButton(master=self.frame_left, text="Ir a inicio", command=self.ir_a_inicio)
@@ -107,18 +105,120 @@ class App(Parametros):
 
         self.logo.grid(row=9, column=0, pady=10, padx=10)
 
-        self.frame_right_calendar.rowconfigure((0), weight=1)
 
         today = datetime.date.today()
-        mindate = datetime.date(year=2018, month=1, day=21)
-        maxdate = today + datetime.timedelta(days=960)
+        self.mindate = datetime.date(year=2018, month=1, day=21)
+        self.maxdate = today + datetime.timedelta(days=960)
 
-        cal = Calendar(self.frame_right_calendar, font="Cascade 13", selectmode='day', locale='es_ES', mindate=mindate, maxdate=maxdate, disabledforeground='red', cursor="hand2", year=2022, month=5, day=20)
-        cal.pack(fill="both", expand=True)
         self.activity()
-
+        with open(os.path.join(self.PATH_CONFIG, "feriados.json"), 'r') as json_file:
+            self.feriados = json.loads(json_file.read())        
+        
+        self.project_calendar(self.feriados)
         self.MASTER.mainloop()
 
+    
+    #identifica si existe una actividad en esa fecha
+    def cantidad_actividades(self, date):
+        i = 0
+        for p in self.project.actividades:  
+            if str(p.fecha_inicio) == str(date):
+                i += 1
+        return i
+                    
+    #identifica los datos de las actividades
+    def actividades(self,date, i):
+        self.date = date
+        i = i
+        self.nombres = []
+        self.duration = []
+        self.fechas = []
+        for p in self.project.actividades:
+            if str(p.fecha_inicio) == str(date):
+                self.nombres.append(p.nombre)
+                self.duration.append(p.duracion)
+                self.fechas.append(p.fecha_inicio)
+        return self.nombres[i], self.duration[i], self.fechas[i]
+
+    #display label con datos de la actividad en la fecha seleccionada
+    def cal_event(self, event):
+        self.date_calendar = (event.widget.selection_get())
+        n = self.cantidad_actividades(self.date_calendar)
+        if n > 0:   
+            for i in range(n):
+                self.actividades(self.date_calendar, i)
+                self.event_name=ctk.CTkLabel(master=self.frame_actividades, corner_radius=5, fg_color=("gray18"), text= self.nombres[i], text_font=("Cascade", 12), text_color="white") 
+                self.event_name.grid(row=i, column=0, sticky="nswe", pady=5, padx=5)
+                self.event_duration=ctk.CTkLabel(master=self.frame_actividades, corner_radius=5, fg_color=("white"), text="Duración: " + self.duration[i] + " dias", text_font=("Cascade", 12), text_color="gray18")
+                self.event_duration.grid(row=i, column=1, sticky="nswe", pady=5, padx=5)
+        
+        else:
+            self.event_none=ctk.CTkLabel(master=self.frame_actividades, corner_radius=10, height=20, fg_color=("gray18"), text="No hay actividades para esta fecha " , text_font=("Cascade", 20), text_color="white")
+            self.event_none.grid(row=0, column=0, pady=5, padx=5, sticky="nswe")
+            
+    def identificar_dia_de_la_semana(self, dia):
+        self.dia = dia
+        self.dia_semana = []
+        for i in range(len(self.dia['dias_no_laborales'])):
+            if ((self.dia['dias_no_laborales'][i]).lower()) == "domingo":
+                self.dia_semana.append(7)
+            elif ((self.dia['dias_no_laborales'][i]).lower()) == "lunes":
+                self.dia_semana.append(1)
+            elif ((self.dia['dias_no_laborales'][i]).lower()) == "martes":
+                self.dia_semana.append(2)
+            elif ((self.dia['dias_no_laborales'][i]).lower()) == "miercoles":
+                self.dia_semana.append(3)
+            elif ((self.dia['dias_no_laborales'][i]).lower()) == "jueves":
+                self.dia_semana.append(4)
+            elif ((self.dia['dias_no_laborales'][i]).lower()) == "viernes":
+                self.dia_semana.append(5)
+            elif ((self.dia['dias_no_laborales'][i]).lower()) == "sabado":
+                self.dia_semana.append(6)
+        return self.dia_semana.sort()
+
+
+    def project_calendar(self, feriados): 
+        """### Identificar los dias no laborales"""
+
+        #abre feriados.json
+        self.feriados = feriados
+        #display calendar
+        self.cal = Calendar(self.frame_right_calendar, font="Cascade 13", selectmode='day', locale='es_ES',
+                mindate= self.mindate, maxdate= self.maxdate, weekenddays = self.identificar_dia_de_la_semana(self.feriados),
+                cursor="hand2", year=2022, month=5, day=20, date_pattern='y-mm-dd', fg_color=self.COLOR_LINEAS,background="gray18", disabledbackground="gray18", bordercolor="black", 
+                headersbackground="gray10", normalbackground="gray18", foreground='white', 
+                normalforeground='white', headersforeground='white',weekendbackground="gray30", weekendforeground='white', disabledforeground='white',)
+        self.cal.pack (side = TOP, fill = "both", expand = True)
+        #self.cal.rowconfigure(0, weight=10)
+        #self.cal.columnconfigure(0, weight=1)
+        #click izquierdo para mostrar actividades
+        self.cal.bind("<<CalendarSelected>>", self.cal_event)
+        self.frame_actividades = ctk.CTkFrame(master=self.frame_right_calendar, fg_color="gray10")
+        self.frame_actividades.pack(side = BOTTOM, fill = "x")
+
+        self.fechas= []
+        for i in self.project.actividades:
+            self.fechas.append(str(i.fecha_inicio))
+        
+        for i in range (len(self.fechas)):
+            self.date = datetime.datetime.strptime(self.fechas[i], '%Y-%m-%d').date()
+            self.cal.calevent_create(self.date, tags=self.fechas[i], text=self.fechas[i])
+        
+        self.mindate_int = self.mindate.strftime('%Y')
+        self.maxdate_int = self.maxdate.strftime('%Y')
+        self.years = int(self.maxdate_int) - int(self.mindate_int) 
+        
+        for i in self.feriados['feriados']:
+            for j in range (self.years):
+                self.year = int(self.mindate_int) + j
+                self.date = datetime.datetime.strptime(i, '%d/%m').date()
+                self.date = self.date.replace(year=self.year)
+                self.cal.calevent_create(self.date, tags=i, text=i)
+                self.cal.tag_config(i, background='red', foreground='yellow')
+
+
+    def generar_reporte (self):
+        self.project.diagrama()
 
     def button_event(self):
         pass
@@ -1039,13 +1139,11 @@ class Main (Parametros):
         self.menu = Menu (self.RAIZ)
         self.RAIZ.config (menu = self.menu,)
         fileMenu = Menu(self.menu, tearoff= False, font= ("Cascade", 10))
-        self.menu.add_cascade(label="Configuracion", menu=fileMenu, hidemargin= True,)
-        fileMenu.add_command(label="Feriados",command=WindowFeriados)
-        fileMenu.add_command(label="Dias laborales",command=WindowNoLaborales)
+        self.menu.add_cascade(label="Configuracion", menu=fileMenu)
+        fileMenu.add_command(label="Feriados", command=WindowFeriados)
+        fileMenu.add_command(label="Dias laborales", command=WindowNoLaborales)
 
         Portada(self.RAIZ, lista_proyectos)
-
-
 
         self.RAIZ.mainloop()
         

@@ -1,0 +1,7 @@
+name,start,end,critical
+Primera actividad,2022-06-06,2022-06-11,y
+Segunda actividad,2022-06-06,2022-06-11,n
+Tercera Actividad,2022-06-11,2022-06-21,y
+Cuarta actividad,2022-06-21,2022-07-03,y
+Quinta Actividad,2022-06-21,2022-06-29,n
+Sexta Actividad,2022-07-03,2022-07-08,y

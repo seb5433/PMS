@@ -13,4 +13,4 @@
 - [ ] Mensaje de error para crear actividades
 - [ ] Terminar los reportes
 - [ ] Comentar todo el Código
-
+- [ ] Hacer informe

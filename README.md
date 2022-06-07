@@ -10,7 +10,7 @@
 - [ ] Actualiza calendario cuando se crean nuevas actividades
 - [ ] Eliminar actividades
 - [ ] Traba para calcular caminos críticos
-- [ ] Mensaje de error para crear actividades
+- [X] Mensaje de error para crear actividades
 - [ ] Terminar los reportes
 - [ ] Comentar todo el Código
 - [ ] Limites 

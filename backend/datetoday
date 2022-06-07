@@ -1,0 +1,71 @@
+def calular_dia (year, month, date):
+    month_kode = [1,4,4,0,2,5,0,3,6,1,4,6]
+    year_kode = [0,6,4,2,0,6]
+    day_kode = [0,1,2,3,4,5,6]
+
+
+    a1 = 0
+    a2 = 0
+    a3 = 0
+    a4 = 0
+    a5 = 0
+
+    year2 = year
+
+    a1 = date
+    month = month - 1
+    month = month_kode[month]
+    a2 = month
+
+
+    if year>=1500 and year<=1599:
+        year2 = year_kode[0]
+
+    if year>=1600 and year<=1699:
+        year2 = year_kode[1]
+
+    if year>=1700 and year<=1799:
+        year2 = year_kode[2]
+
+    if year>=1800 and year<=1899:
+        year2 = year_kode[3]
+
+    if year>=1900 and year<=1999:
+        year2 = year_kode[4]
+
+    if year>=2000 and year<=2099:
+        year2 = year_kode[5]
+
+    a3 = year2
+
+    a4 = year % 100
+
+    a5 = a4 / 4
+    a5 = int(a5)
+
+    a6 = a1 + a2 + a3 + a4 + a5
+
+    a7 = a6 % 7
+    a8 = 0
+    a8 = day_kode[a7]
+
+    if a8 == 0:
+        return "SABADO"
+
+    if a8 == 1:
+        return "DOMINGO"
+
+    if a8 == 2:
+        return "LUNES"
+
+    if a8 == 3:
+        return "MARTES"
+
+    if a8 == 4:
+        return "MIERCOLES"
+
+    if a8 == 5:
+        return "JUEVES"
+
+    if a8 == 6:
+        return "VIERNES"

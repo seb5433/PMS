@@ -197,17 +197,7 @@ class Project():
         leyenda = [Patch(facecolor=leyend_dict[i], label=i)  for i in leyend_dict]
         plt.legend(handles=leyenda)
 
-        """plt.savefig('images/gant.png')
-        Image.open('images/gant.png').save('images/gant.jpg','JPEG')"""
-
-        plt.plot([1, 2])
         plt.savefig('images/gant.jpg')
-        """im = Image.open("images/gant.jpg")
-        newsize = (450, 300)
-        im = im.resize(newsize)
-        im.save("images/gant.jpg")"""
-
-        #plt.show()
 
     def generarReporte(self):
         self.diagrama()
@@ -232,7 +222,7 @@ class Project():
         nombrePDF = "Reporte.pdf"
 
         reporte = reportePDF(titulo, cabecera, datos, nombrePDF).Exportar()
-        print(reporte)
+        #print(reporte)
 
     """
     Metodos de manejo de relaciones

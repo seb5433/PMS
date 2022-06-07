@@ -1,3 +1,4 @@
+import os
 from arrow import utcnow
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, mm
@@ -5,7 +6,7 @@ from reportlab.lib.utils import ImageReader
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle, Image
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
-from reportlab.lib.colors import black, purple, white
+from reportlab.lib.colors import black, purple, white, limegreen, gray
 from reportlab.pdfgen.canvas import Canvas
 
 # ======================= CLASE reportePDF =========================
@@ -80,7 +81,7 @@ class reportePDF(object):
         """Exportar los datos a un archivo PDF."""
 
         alineacionTitulo = ParagraphStyle(name="centrar", alignment=TA_CENTER, fontSize=13,
-                                          leading=10, textColor=purple,
+                                          leading=10, textColor=gray,
                                           parent=self.estilos["Heading1"])
         
         self.ancho, self.alto = letter
@@ -89,7 +90,7 @@ class reportePDF(object):
     
         tabla = Table(convertirDatos, colWidths=(self.ancho-100)/len(self.cabecera), hAlign="CENTER")
         tabla.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0),(-1, 0), purple),
+            ("BACKGROUND", (0, 0),(-1, 0), gray),
             ("ALIGN", (0, 0),(0, -1), "LEFT"),
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"), # Texto centrado y alineado a la izquierda
             ("INNERGRID", (0, 0), (-1, -1), 0.50, black), # Lineas internas
@@ -117,7 +118,9 @@ class reportePDF(object):
                              onLaterPages=self._encabezadoPiePagina,
                              canvasmaker=numeracionPaginas)
             
+
          # +------------------------------------+
+            os.startfile("Reporte.pdf")
             return "Reporte generado con éxito."
          # +------------------------------------+
         except PermissionError:
@@ -157,43 +160,6 @@ class numeracionPaginas(Canvas):
         self.drawRightString(204 * mm, 15 * mm + (0.2 * inch),
                              "Página {} de {}".format(self._pageNumber, conteoPaginas))        
 
-
-
-'''
-# ===================== FUNCIÓN generarReporte =====================
-
-def generarReporte():
-    """Ejecutar consulta a la base de datos (DB_USUARIOS) y llamar la función Exportar, la
-       cuál esta en la clase reportePDF, a esta clase le pasamos el título de la tabla, la
-       cabecera y los datos que llevará."""
-    #conexionDB = connect("DB_USUARIOS.db")
-    #conexionDB.row_factory = dict_factory # Forma avanzada de obtener resultados
-    #cursor = conexionDB.cursor()
-
-    #cursor.execute("SELECT DNI, NOMBRE, APELLIDO, FECHA_NACIMIENTO FROM USUARIOS")
-    #datos = cursor.fetchall()
-    datos = [{"NOMBRE": "Andres", "APELLIDO": "Niño", "FECHA_NACIMIENTO": "06/06/2019"},
-              {"NOMBRE": "A14331413", "APELLIDO": "Nsgsg", "FECHA_NACIMIENTO": "06/06/2019"},
-              {"NOMBRE": "Asdasdasdadss", "APELLIDO": "adsadad", "FECHA_NACIMIENTO": "06/06/2019"}]
-
-    #conexionDB.close()
-
-    titulo = "Proyecto: Pr1"
-    
-    cabecera = (("NOMBRE", "NOMBRE"),
-        ("APELLIDO", "APELLIDO"),
-        ("FECHA_NACIMIENTO", "FECHA DE NACIMIENTO"))
-
-    nombrePDF = "Reporte.pdf"
-
-    reporte = reportePDF(titulo, cabecera, datos, nombrePDF).Exportar()
-    print(reporte)
-
-
-# ======================== LLAMAR FUNCIÓN ==========================
-
-#generarReporte()
-'''
 
 
 

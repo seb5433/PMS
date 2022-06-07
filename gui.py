@@ -1,6 +1,7 @@
 # GUI del administrador de proyectos
 import json
 from tkinter import *
+from tkinter import messagebox
 from tkinter.ttk import Style, Treeview
 from wsgiref.validate import validator
 from backend.backend import Project
@@ -29,6 +30,8 @@ class Parametros ():
         self.PATH_IMAGE = os.path.join (self.PATH,'images')
         self.PATH_CONFIG = os.path.join (self.PATH,'config')
         self.PATH_DATA = os.path.join (self.PATH,'data')
+        self.LIMITE_PROYECTOS = 999
+        self.LIMITE_ACTIVIADES = 99
 
     def resource_path(self):
         try:
@@ -340,6 +343,9 @@ class App(Parametros):
             self.activity_tree.selection_remove(self.activity_tree.selection()[0])
 
     def open_crear_actividad (self, titulo, callback):
+        if (len(self.project.actividades) >= self.LIMITE_ACTIVIADES and "Editar" not in titulo):
+            messagebox.showerror ("Error de limite", "Haz superado el limite de actividades")
+            return
         self.frame_crear_actividad = ctk.CTkToplevel (bg = "#292E36")
         self.frame_crear_actividad.wm_overrideredirect(True)
         self.frame_crear_actividad.resizable(0, 0)
@@ -465,7 +471,7 @@ class WindowProject(Parametros):
     def __init__(self, parent_properties = None,lista_proyectos = None):
         super().__init__()
         self.parent_properties = parent_properties
-
+        
         self.MASTER = ctk.CTkToplevel()
         self.MASTER.geometry(f"{WindowProject.width}x{WindowProject.height}")
         self.MASTER.minsize(WindowProject.width, WindowProject.height)
@@ -497,7 +503,7 @@ class WindowProject(Parametros):
         self.frame_NP = ctk.CTkFrame(master=self.frame, width=220, height=70, corner_radius=20)
         self.frame_NP.place(relx=0.5, rely=0.2, anchor=N)
 
-        self.label_NP = ctk.CTkLabel(self.frame_NP, corner_radius=10, width=200, height=30, fg_color=("#3d5a80"), text="Nombre del Proyecto")
+        self.label_NP = ctk.CTkLabel(self.frame_NP, corner_radius=10, width=200, height=30, fg_color= ("#3d5a80"), text="Nombre del Proyecto")
         self.label_NP.place(relx=0.5, rely=0.3, anchor=CENTER)
 
         self.nombre_proyecto = ctk.CTkEntry(master=self.frame_NP, width=200, placeholder_text="nuevo_proyecto")
@@ -510,36 +516,43 @@ class WindowProject(Parametros):
 
         self.label_DP = ctk.CTkLabel(master=self.frame_DP, corner_radius=20, width=200, height=20, fg_color=("#3d5a80"), text="Descripcion del Proyecto")
         self.label_DP.place(relx=0.5, rely=0.1, anchor=CENTER)
-
+        """
         self.descripcion_proyecto = ctk.CTkEntry(master=self.frame_DP, width=200, height=150, placeholder_text="descripcion_proyecto", bg="gray18")
         self.descripcion_proyecto.place(relx=0.5, rely=0.55, anchor=CENTER)
-
+        """
+        self.descripcion_proyecto = Text(self.frame_DP, width= 26, height=9, fg="white", borderwidth=2, font=("Arial", 10), wrap=WORD, bg=self.COLOR_FONDO, relief="groove",) 
+        self.descripcion_proyecto.place(relx=0.5, rely=0.55, anchor=CENTER)
+        
 
         # Fecha de Inicio
-        self.frame_FP = ctk.CTkFrame(self.frame, width=220, height=50, corner_radius=20)
+        self.frame_FP = ctk.CTkFrame(self.frame, width=220, height=60, corner_radius=20)
         self.frame_FP.place(relx=0.5, rely=0.76, anchor=CENTER)
-
-        self.label_FP = ctk.CTkLabel(self.frame_FP, width=200, height=20, text="Fecha de Inicio", fg_color="#3d5a80")
+        
+        self.label_FP = ctk.CTkLabel(self.frame_FP, width=200, height=20,corner_radius = 20, text="Fecha de Inicio", fg_color="#3d5a80")
         self.label_FP.place(relx=0.5, rely=0.25, anchor=CENTER)
 
-        self.button_FP = DateEntry(self.frame_FP, width=12, background="gray18",foreground="gray18", borderwidth=2, year=2022)
-        self.button_FP.pack(padx=10, pady=10)
+        self.frame_calendario = ctk.CTkFrame(self.frame_FP, width=120, height=30, corner_radius=20,fg_color="white",border_color="#3d5a80", border_width=3)
+        self.frame_calendario.place(relx=0.5, rely=0.7, anchor=CENTER)
 
+        self.cal = DateEntry(self.frame_calendario, width=12, background="gray18",foreground="white", borderwidth=1, year=2022, selec_mode="day", locale='es_ES', date_pattern="yyyy-mm-dd")
+        self.cal.place(relx=0.5, rely=0.50, anchor=CENTER)
+        
+
+        # Boton de GUARDAR
         self.button_cargar = ctk.CTkButton(master =self.frame, text= "GUARDAR DATOS", width=280, height=40, fg_color= "#3d5a80", command=lambda:self.button_event(lista_proyectos))
         self.button_cargar.place(relx=0.5, rely=0.9, anchor=CENTER)
 
 
-    def button_event(self,lista_proyectos):
+    def button_event(self, lista_proyectos):
         """# Obtencion de datos para cargar"""
         nombre = self.nombre_proyecto.get()
-        descripcion = self.descripcion_proyecto.get()
-        fecha = self.button_FP.get_date()
+        descripcion = self.descripcion_proyecto.get("1.0", END)
+        fecha = self.cal.get_date()
         lista = Project.add_project(lista_proyectos, nombre, descripcion, fecha)
         self.parent_properties.LISTA_PROYECTOS = lista
         self.parent_properties.data_manage()
         self.parent_properties.draw_data()
         self.MASTER.destroy()
-    
     
 
 
@@ -585,12 +598,55 @@ class Portada (Parametros):
                 x+=1
         
     def draw_data (self):
-        #TODO: Arreglar esta cagada
+        #TODO: Arreglar esto
         self.tabla_proyectos.destroy()
         self.desplegar_tabla()
 
+    def check (self,event):
+        cadena = self.entry_buscador.get()
+        backup = []
+        self.searcher(cadena,backup)
+
+    def searcher (self,cadena,backup):
+        lista = self.tabla_proyectos.get_sheet_data()
+        ind = 0
+        lis_ind = []
+        contador = 1
+
+        for x in lista:
+            palabra = ""
+            cadena = cadena.lower()
+            contador = len(cadena)
+            palabra_lista = list(str(x[0]))
+
+            for i in range (0,contador):
+                try:
+                    palabra = palabra + (palabra_lista[i])
+                except IndexError:
+                    pass
+
+            if cadena == palabra.lower():
+
+                if cadena not in backup:
+                    backup.append(cadena)
+
+                contador = contador + 1
+
+                lis_ind.append(ind)
+
+            ind += 1
+
+        if cadena != '':
+            self.tabla_proyectos.dehighlight_all()
+            self.tabla_proyectos.highlight_rows(rows=lis_ind, bg="black", redraw=True)
+            if lis_ind != []:
+                self.tabla_proyectos.see(row=lis_ind[0], column=0, redraw=True,)
+        else:
+            self.tabla_proyectos.dehighlight_all()
+            self.tabla_proyectos.redraw()
+    
+
     def desplegar_tabla (self):
-        
         self.tabla_proyectos = sheet.Sheet(self.frame_down,headers = ['Proyecto', 'Descripción', 'Inicio', 'Avance'], data = self.data,
         show_table = True,
         show_top_left = False,
@@ -730,6 +786,7 @@ class Portada (Parametros):
 
         self.entry_buscador = ctk.CTkEntry(master=self.frame_buscador_child,text_font=("Cascade", 12),placeholder_text="Buscar proyecto...",width=500,height=40, text_color= "#768390")
         self.entry_buscador.pack(padx=20)
+        self.entry_buscador.bind('<KeyRelease>',self.check)
 
 
         # CREACION DE LOS BOTONES
@@ -751,6 +808,9 @@ class Portada (Parametros):
         App (self.frame_calendario, self, project)
 
     def nuevo_proyecto (self):
+        if (len(self.LISTA_PROYECTOS) >= self.LIMITE_PROYECTOS):
+            messagebox.showerror ("Error de limite", "Haz superado el limite de proyectos")
+            return
         WindowProject(self, self.LISTA_PROYECTOS)
 
     def eliminar (self,lista_proyecto):
@@ -786,7 +846,7 @@ class WindowFeriados(Parametros):
         with open("config/"+"feriados.json","r") as file:
             JSON=json.loads(file.read())
             self.feriados=JSON['feriados'] 
-            self.dias_no_laborales2=JSON['dias_no_laborales']
+            self.dias_no_laborales=JSON['dias_no_laborales']
         for i in range (len(self.feriados)):
             datos.append([self.feriados[i]])
 
@@ -966,13 +1026,19 @@ class WindowFeriados(Parametros):
     def button_event(self):
         """# Obtencion de datos para cargar"""
         #print("\nNuevo:", self.feriado_add.get(), "\nEliminar:", self.feriado_del.get())
-
-        if self.feriado_add.get() != "":
-            self.feriado.new_feriado(self.feriados,self.dias_no_laborales2,self.feriado_add.get())
-
+        fecha = self.feriado_add.get()
+        numeros = [0,1,2,3,4,5,6,7,9]
+        if fecha != "":
+            try:
+                fecha = list(fecha)
+                fecha[2] = '/'
+                fecha = "".join(fecha)
+                int (fecha[0]) in numeros and int (fecha[1]) in numeros and fecha[2] == '/' and int (fecha[3]) in numeros and int (fecha[4]) in numeros
+                self.feriado.new_feriado(self.feriados,self.dias_no_laborales,fecha)
+            except ValueError:
+                pass
         if self.feriado_del.get() != "":
-            self.feriado.borrar_feriados(self.feriados,self.dias_no_laborales2,self.feriado_del.get())
-            
+            self.feriado.borrar_feriados(self.feriados,self.dias_no_laborales,self.feriado_del)
         self.MASTER.destroy()
 
 class WindowNoLaborales(Parametros):
@@ -999,9 +1065,9 @@ class WindowNoLaborales(Parametros):
         with open("config/"+"feriados.json","r") as file:
             JSON=json.loads(file.read())
             self.feriados=JSON['feriados'] 
-            self.dias_no_laborales2=JSON['dias_no_laborales']
-        for i in range (len(self.dias_no_laborales2)):
-            datos.append([self.dias_no_laborales2[i]])
+            self.dias_no_laborales=JSON['dias_no_laborales']
+        for i in range (len(self.dias_no_laborales)):
+            datos.append([self.dias_no_laborales[i]])
 
         self.MASTER = ctk.CTkToplevel()
         self.MASTER.geometry(f"{WindowNoLaborales.width}x{WindowNoLaborales.height}")
@@ -1177,13 +1243,15 @@ class WindowNoLaborales(Parametros):
         """# Obtencion de datos para cargar"""
 
         # print("\nNuevo:", self.feriado_add.get(), "\nEliminar:", self.feriado_del.get())
+        feriados = ["DOMINGO","LUNES","MARTES","MIERCOLES","JUEVES","VIERNES","SABADO"]
 
-        if self.feriado_add.get() != "":
-            self.feriado.new_no_laboral(self.feriados,self.dias_no_laborales2,self.feriado_add.get())
+
+        if self.feriado_add.get() != "" and self.feriado_add.get().upper() in feriados:
+            self.feriado.new_no_laboral(self.feriados,self.dias_no_laborales,self.feriado_add.get())
 
         if self.feriado_del.get() != "":
-            self.feriado.borrar_dia_no_laboral(self.feriados,self.dias_no_laborales2,self.feriado_del.get())
-            
+            self.feriado.borrar_dia_no_laboral(self.feriados,self.dias_no_laborales,self.feriado_del.get())
+
 
         self.MASTER.destroy()
 

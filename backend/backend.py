@@ -413,18 +413,20 @@ class Relation():
 Clase feriado 
 """
 class Feriado():
-    
+ 
     def new_feriado(self,feriados,dias,nuevo_feriado):
         self.dias_no_laborales=[]
         self.nuevo_feriado=nuevo_feriado
-        if nuevo_feriado in feriados:
-            print("El feriado ya se encuentra actualmente\n")
-        else:    
-            feriados.append(nuevo_feriado)
-            with open("config/"+"feriados.json","w") as file:
-                    dict={'feriados':feriados,'dias_no_laborales':dias}
-                    file.write(json.dumps(dict))
-            print("El feriado se agrego correctamente")        
+        bandera=self.validar_feriado(nuevo_feriado)
+        if bandera==1:
+            if nuevo_feriado in feriados:
+                print("El feriado ya se encuentra actualmente\n")
+            else:    
+                feriados.append(nuevo_feriado)
+                with open("config/"+"feriados.json","w") as file:
+                        dict={'feriados':feriados,'dias_no_laborales':dias}
+                        file.write(json.dumps(dict))
+                print("El feriado se agrego correctamente")        
 
     def borrar_feriados(self,feriados,dias,borrar_feriado):
         self.dias_no_laborales=[]
@@ -461,8 +463,31 @@ class Feriado():
                 file.write(json.dumps(dict))
         else:
             print("El dia no laboral no existe\n")
-
-
+    def validar_feriado(self,nuevo_feriado):
+        self.meses= (0,31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+        self.cant_meses=["01","02","03","04","05","06","07","08","09","10","11","12"]
+        POS = nuevo_feriado.index("/")
+        MES = nuevo_feriado[POS+1:]
+        dia=nuevo_feriado[0:POS]
+        if MES in self.cant_meses:
+            if MES[0]=="0":
+                MES=int(MES[0]+MES[1])
+            else:
+                MES=int(MES)
+            if dia[0]=="0":
+                dia=int(dia[0]+dia[1])
+            else:
+                dia=int(dia)
+            if(MES >= 1 and MES <= 12):
+                if(dia >= 1 and dia <= self.meses[MES]):
+                    bandera=1 
+                    return bandera
+                else:
+                    bandera=0
+                    return bandera
+            else:
+                    bandera=0
+                    return bandera
 
 
 """

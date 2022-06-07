@@ -2,7 +2,7 @@
 # ![alt text](https://github.com/seb5433/PMS/blob/main/images/logo.png)
 
 ### Proyecto para el Segundo Parcial 2022 Algoritmos 2
------
+------
 ### TODO
 
 - [ ] Modifica libreria principal

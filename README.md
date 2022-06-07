@@ -14,4 +14,5 @@
 - [ ] Terminar los reportes
 - [ ] Comentar todo el Código
 - [ ] Limites 
+- [ ] Editar la fecha de la pestaña nuevo
 - [ ] Hacer informe

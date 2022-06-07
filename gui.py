@@ -332,7 +332,7 @@ class App(Parametros):
         menu = Menu (self.frame_right_activity, tearoff= 0, title= "Manejo de actividades", relief= "flat")
         menu.add_command (label= "Nueva actividad", font = font, command = lambda: self.open_crear_actividad("Crear actividad", self.crear_actividad))
         menu.add_command (label= "Editar actividad", font = font, command = lambda: self.open_crear_actividad("Editar actividad", self.editar_actividad))
-        menu.add_command (label= "Eliminar actividad", font = font, )
+        menu.add_command (label= "Eliminar actividad", font = font,command = self.eliminar_actividad )
         menu.post(event.x_root, event.y_root)
 
     def deselect_all (self, event):
@@ -396,6 +396,14 @@ class App(Parametros):
         self.project.update()
         if len(children) > 0:
             self.project.new_relation (int(children[0]), id)
+        self.cargar_actividades()
+
+    def eliminar_actividad (self):
+        id = self.activity_tree.selection()[0]
+        if (id == ""):
+            return
+        self.project.del_activity (int(id))
+        self.project.update()
         self.cargar_actividades()
 
     def validar_datos (self):

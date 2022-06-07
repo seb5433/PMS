@@ -8,7 +8,7 @@
 - [ ] Ocultar Critical PATH
 - [X] Evitar dias feriados y no laborales
 - [X] Actualiza calendario cuando se crean nuevas actividades
-- [ ] Eliminar actividades
+- [X] Eliminar actividades
 - [ ] Traba para calcular caminos críticos
 - [X] Mensaje de error para crear actividades
 - [ ] Terminar los reportes

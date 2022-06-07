@@ -13,6 +13,8 @@
 - [X] Mensaje de error para crear actividades
 - [ ] Terminar los reportes
 - [ ] Comentar todo el Código
-- [X] Limites
-- [X] Editar la fecha de la pestaña nuevo 
+- [ ] Buscador de proyecto
+- [ ] Limites
+- [ ] Editar la fecha de la pestaña nuevo 
+- [ ] Error del matplotlib
 - [ ] Hacer informe

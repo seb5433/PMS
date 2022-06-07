@@ -18,3 +18,11 @@
 - [ ] Editar la fecha de la pestaña nuevo 
 - [ ] Error del matplotlib
 - [ ] Hacer informe
+
+------
+### Itegrantes
+- 5176882 - Jose Sebastian Vera
+- 5425495 - Esteban Gabriel Fernandez Arrua
+- 5611153 - Ilson Matías González Estigarribia
+- 5898204 - Carlos Sebastian Alvarez Aranda
+- 5738080 - Fabrizio Fabian Roman Ruiz Diaz

@@ -249,7 +249,7 @@ class Calendar(ttk.Frame):
         if not weekenddays:
             l = list(self._cal.iterweekdays())
             weekenddays = [l.index(5) + 1, l.index(6) + 1]  # saturday and sunday
-        self._check_weekenddays(weekenddays)
+        #self._check_weekenddays(weekenddays)
 
         # --- locale
         locale = kw.pop("locale", default_locale())
@@ -565,7 +565,8 @@ class Calendar(ttk.Frame):
                 for label, day in zip(self._week_days, self._cal.iterweekdays()):
                     label.configure(text=self._day_names[day % 7])
             elif key == 'weekenddays':
-                self._check_weekenddays(value)
+                #self._check_weekenddays(value)
+                pass
             elif key == 'borderwidth':
                 try:
                     bd = int(value)

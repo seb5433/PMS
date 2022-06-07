@@ -146,7 +146,7 @@ class App(Parametros):
 
     #display label con datos de la actividad en la fecha seleccionada
     def cal_event(self, event):
-        self.frame_actividades = ctk.CTkFrame(master=self.frame_right_calendar, width=500, height=90, fg_color="gray10")
+        self.frame_actividades = ctk.CTkFrame(master=self.frame_right_calendar, width=500, height=90, fg_color = self.COLOR_PRIMARIO)
         self.frame_actividades.grid(row=1, column=0, sticky="nswe")
         self.date_calendar = (event.widget.selection_get())
         n = self.cantidad_actividades(self.date_calendar)
@@ -156,13 +156,15 @@ class App(Parametros):
         if n > 0:   
             for i in range(n):
                 self.actividades(self.date_calendar, i)
-                self.event_name=ctk.CTkLabel(master=self.frame_actividades, corner_radius=5, fg_color=("gray18"), text= self.nombres[i], text_font=("Cascade", 12), text_color="white") 
-                self.event_name.grid(row=i, column=0, sticky="nswe", pady=5, padx=5)
-                self.event_duration=ctk.CTkLabel(master=self.frame_actividades, corner_radius=5, fg_color=("white"), text="Duración: " + self.duration[i], text_font=("Cascade", 12), text_color="gray18")
-                self.event_duration.grid(row=i, column=1, sticky="nswe", pady=5, padx=5)
+                self.event_name = ctk.CTkLabel(master=self.frame_actividades, corner_radius=5, text= self.nombres[i], text_font=("Cascade", 12)) 
+                self.event_name.grid(row=i, column=0, sticky="nswe", pady=2, padx=2)
+                self.event_date = ctk.CTkLabel(master=self.frame_actividades, corner_radius=5, text= self.fechas[i], text_font=("Cascade", 12)) 
+                self.event_date.grid(row=i, column=1, sticky="nswe", pady=2, padx=2)
+                self.event_duration = ctk.CTkLabel(master=self.frame_actividades, corner_radius=5, fg_color=("white"), text="Duración: " + self.duration[i], text_font=("Cascade", 12), text_color="gray18")
+                self.event_duration.grid(row=i, column=2, sticky="nswe", pady=2, padx=2)
         
         else:
-            self.event_none=ctk.CTkLabel(master=self.frame_actividades, corner_radius=10, height=20, fg_color=("gray18"), text="No hay actividades para esta fecha " , text_font=("Cascade", 20), text_color="white")
+            self.event_none=ctk.CTkLabel(master=self.frame_actividades, corner_radius=10, height=20, fg_color=("#1D1F28"), text="No hay actividades para esta fecha " , text_font=("Cascade", 20), text_color="#FFFFFF")
             self.event_none.grid(row=0, column=0, pady=5, padx=5, sticky="nswe")
             
     def identificar_dia_de_la_semana(self, dia):
@@ -193,10 +195,28 @@ class App(Parametros):
         self.feriados = feriados
         #display calendar
         self.cal = Calendar(self.frame_right_calendar, font="Cascade 13", selectmode='day', locale='es_ES',
-                mindate= self.mindate, maxdate= self.maxdate, weekenddays = self.identificar_dia_de_la_semana(self.feriados),
-                cursor="hand2", year=2022, month=5, day=20, date_pattern='y-mm-dd', fg_color=self.COLOR_LINEAS,background="gray18", disabledbackground="gray18", bordercolor="black", 
-                headersbackground="gray10", normalbackground="gray18", foreground='white', 
-                normalforeground='white', headersforeground='white',weekendbackground="gray30", weekendforeground='white', disabledforeground='white',)
+                mindate= self.mindate, maxdate= self.maxdate, 
+                weekenddays = self.identificar_dia_de_la_semana(self.feriados),
+                othermonthbackground = "#5D6466",
+                othermonthforeground = "#FFFFFF",
+                cursor="hand2",
+                year=2022,
+                month=5,
+                day=20,
+                date_pattern='y-mm-dd',
+                fg_color=self.COLOR_LINEAS,
+                background = self.COLOR_PRIMARIO,
+                disabledbackground="red",
+                bordercolor="#B5BAB8", 
+                headersbackground="#1D1F28",
+                normalbackground="#22272E",
+                foreground='#FFFFFF',
+                normalforeground='#FFFFFF',
+                headersforeground='white',
+                weekendbackground="#3F464A",
+                weekendforeground='white',
+                disabledforeground='#FFFFFF'
+                )
         self.cal.grid(row=0, column=0, sticky="nswe", padx=10, pady=10)
         self.cal.rowconfigure(0, weight=1)
         self.cal.columnconfigure(0, weight=1)
@@ -209,7 +229,8 @@ class App(Parametros):
         
         for i in range (len(self.fechas)):
             self.date = datetime.datetime.strptime(self.fechas[i], '%Y-%m-%d').date()
-            self.cal.calevent_create(self.date, tags=self.fechas[i], text=self.fechas[i])
+            self.cal.calevent_create(self.date, text=self.fechas[i], tags = "activity")
+            self.cal.tag_config("activity", background='#2ea043', foreground='#FFFFFF')
         
         self.mindate_int = self.mindate.strftime('%Y')
         self.maxdate_int = self.maxdate.strftime('%Y')
